@@ -1,14 +1,14 @@
 # PrizeKey demo: 90 seconds
 
-**0–15s — Problem.** "Giving Bitcoin usually means sending it immediately, sharing a key, or trusting a custodian. What if the gift itself could be passed along before anyone spends it?"
+**0–15s — Problem.** "A contest wants to announce a native Bitcoin prize today, but the winner has not supplied a Bitcoin address. How can the organizer fund it now and hand over control later?"
 
-**15–35s — Product.** Open the app. Show the live gift list and gift #0. Explain that the claim's owner is a NEAR account while the funds sit at a native Bitcoin testnet4 address. The app derives that address from the PrizeKey contract and gift ID.
+**15–35s — Product.** Open the app on gift #1, **A Bitcoin prize**. Show its 100,000 sat UTXO and current NEAR owner. The organizer funded the prize's native Bitcoin address before knowing the final Bitcoin destination. The claim remains transferable.
 
-**35–65s — Real handoff.** Follow the proof links in order: NEAR mint, Bitcoin funding, NEAR transfer to a new account, new holder's signing request, confirmed Bitcoin payout. Show the NEAR owner and Bitcoin UTXO balance in the live app. Explain that the contract rejected the old owner and froze transfer once redemption began.
+**35–65s — Real handoff.** Show one complete previous handoff using gift #0: the NEAR claim moved to a new account, that account requested the Chain Signatures signature, and the Bitcoin payout is confirmed. Open the transfer and Bitcoin payout links, then show the gift #0 owner and zero balance in the app. This is historical proof, not a fresh browser transaction.
 
-**65–90s — Why NEAR.** The NEAR contract enforces who can request the Chain Signatures MPC signature; Bitcoin receives an ordinary native transaction. No bridge or wrapped token. End with `pnpm verify:public` reporting the same holder, funding output, spent input, destination, and confirmed payout.
+**65–90s — Why NEAR.** The gift contract checks its current owner before requesting the Chain Signatures MPC signature; Bitcoin receives an ordinary native transaction. No bridge or wrapped token. End with `pnpm verify:public` reporting gift #0's completed payout and gift #1's still-funded UTXO.
 
-Optional live interaction: connect a NEAR testnet wallet, create a new gift, and copy its derived Bitcoin testnet4 address. A fully live redemption needs a funded testnet4 UTXO and a recipient Bitcoin testnet4 address. Do not substitute a scripted claim for a wallet flow without labeling it.
+For the final video, prefer a live action with a visible result: connect the organizer's NEAR testnet wallet, transfer a funded claim, and refresh to show its owner changed while the Bitcoin remains at the same native address. This has **not yet been recorded or verified in the browser**. If wallet connection is unavailable, show the CLI action and label it as such. A fresh redemption additionally needs a funded testnet4 UTXO and a recipient Bitcoin testnet4 address. Do not substitute a scripted claim for a wallet flow without labeling it.
 
 ## Evidence and claims
 

@@ -161,7 +161,9 @@ impl GiftContract {
 
 fn parse_id(token_id: &str) -> u64 {
     assert!(!token_id.is_empty() && token_id.bytes().all(|b| b.is_ascii_digit()), "invalid token_id");
-    token_id.parse().expect("token_id overflow")
+    let id: u64 = token_id.parse().expect("token_id overflow");
+    assert_eq!(token_id, id.to_string(), "token_id must be canonical");
+    id
 }
 
 #[cfg(test)]
@@ -230,5 +232,13 @@ mod tests {
         context("giver.testnet", NearToken::from_yoctonear(1));
         assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
             contract.nft_transfer("recipient.testnet".parse().unwrap(), "0".into(), None, None))).is_err());
+    }
+
+    #[test]
+    fn token_id_aliases_are_rejected() {
+        assert_eq!(parse_id("0"), 0);
+        assert_eq!(parse_id("42"), 42);
+        assert!(std::panic::catch_unwind(|| parse_id("00")).is_err());
+        assert!(std::panic::catch_unwind(|| parse_id("042")).is_err());
     }
 }
