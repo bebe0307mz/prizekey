@@ -13,6 +13,10 @@ const browserGiftId = '2';
 const browserCreator = 'prizekey-poc-11a7.testnet';
 const browserMintTx = '9FG1zzvcndTZS51w3J4UFWkUnVQnF1PSjRpwMS2ZDSE3';
 const browserTransferTx = 'C2Km3c5KkduLeRfv7tS9Kt829kNYmBnxj92CMg66iu4N';
+const browserSignTx = 'Ft1hmMjDpW6AuXmELEtohZUDX75YahN7crYDk3ppEkNg';
+const browserFundingTxid = '94941c6f05f512afac3eea0f7e7b4fa6407c03b8170776d0426c19c198abff1d';
+const browserPayoutTxid = '58619632aa1e44ce6e28cb838d4015046894585b1ca3e0e2ff463bcf016a8550';
+const browserDestination = 'tb1q40tm8unf8g7lcg4cmg47fhmhhyssnuqfqaesr5';
 
 async function json(url, options) {
   const response = await fetch(url, options);
@@ -67,14 +71,19 @@ function hasNftEvent(tx, eventName, tokenId, ownerId, receiverId) {
 const gift = await view('gift', { token_id: '0' });
 const prize = await view('gift', { token_id: '1' });
 const browserGift = await view('gift', { token_id: browserGiftId });
-const [mintTx, transferTx] = await Promise.all([
+const [mintTx, transferTx, signTx] = await Promise.all([
   nearTx(browserMintTx, browserCreator), nearTx(browserTransferTx, browserCreator),
+  nearTx(browserSignTx, recipient),
 ]);
 assert.equal(browserGift.owner_id, recipient);
-assert.equal(browserGift.redemption_started, false);
+assert.equal(browserGift.redemption_started, true);
+assert.equal(browserGift.pending, false);
+assert.equal(typeof browserGift.last_signature, 'string');
+assert.match(browserGift.last_payload_hex, /^[0-9a-f]{64}$/);
 assert.equal(browserGift.title, 'Browser flow check · 11 Nov');
 assert.equal(mintTx.transaction.signer_id, browserCreator);
 assert.equal(transferTx.transaction.signer_id, browserCreator);
+assert.equal(signTx.transaction.signer_id, recipient);
 assertNearAction(mintTx, 'create_gift', {
   title: 'Browser flow check · 11 Nov',
   message: 'Created through the live PrizeKey browser app on NEAR testnet.',
@@ -82,6 +91,22 @@ assertNearAction(mintTx, 'create_gift', {
 assertNearAction(transferTx, 'nft_transfer', {
   receiver_id: recipient, token_id: browserGiftId,
 }, '1');
+assertNearAction(signTx, 'request_btc_signature', {
+  token_id: browserGiftId, payload_hex: browserGift.last_payload_hex,
+}, '0');
+assert.equal(Buffer.from(signTx.status.SuccessValue, 'base64').toString(), 'true');
+assert.ok(signTx.receipts_outcome.some((receipt) =>
+  receipt.outcome.executor_id === 'v1.signer-prod.testnet' &&
+  receipt.outcome.logs.some((line) => line.includes('predecessor=AccountId("prizekey-v1-11b.testnet")') &&
+    line.includes('path: "prizekey-btc-v1-2"'))), 'recipient request did not reach MPC signer for gift #2');
+assert.ok(signTx.receipts_outcome.some((receipt) => receipt.outcome.executor_id === contract &&
+  receipt.outcome.logs.some((line) => {
+    if (!line.startsWith('EVENT_JSON:')) return false;
+    const event = JSON.parse(line.slice('EVENT_JSON:'.length));
+    return event.standard === 'prizekey' && event.event === 'btc_signature_ready' &&
+      event.data?.token_id === browserGiftId &&
+      event.data?.payload_hex === browserGift.last_payload_hex;
+  })), 'gift contract did not emit matching MPC signature callback event');
 assert.equal(hasNftEvent(mintTx, 'nft_mint', browserGiftId, browserCreator), true);
 assert.equal(hasNftEvent(transferTx, 'nft_transfer', browserGiftId, browserCreator, recipient), true);
 assert.equal(gift.owner_id, recipient);
@@ -99,6 +124,9 @@ const { address, publicKey } = await bitcoin.deriveAddressAndPublicKey(contract,
 assert.equal(address, 'tb1qlnh99fd5amupc6tf65gh8a7eu37ujl94dj0cht');
 const { address: prizeAddress } = await bitcoin.deriveAddressAndPublicKey(contract, 'prizekey-btc-v1-1');
 assert.equal(prizeAddress, 'tb1qtwwe5nlkzpnv3tj8rd5gn4wjrn6nejve3flhfm');
+const { address: browserAddress, publicKey: browserPublicKey } =
+  await bitcoin.deriveAddressAndPublicKey(contract, 'prizekey-btc-v1-2');
+assert.equal(browserAddress, 'tb1qkt5n8s42ac9y6f4sjwdgql0p5ef0w72mk4dxcy');
 
 const [funding, payout, payoutStatus] = await Promise.all([
   json(`${btcApi}/tx/${fundingTxid}`), json(`${btcApi}/tx/${payoutTxid}`),
@@ -133,6 +161,38 @@ assert.ok(payout.vin.some((i) => i.txid === fundingTxid && i.vout === fundedOutp
 assert.ok(payout.vout.some((o) => o.scriptpubkey_address === destination && o.value === 99_750), 'recipient payout missing');
 assert.equal(payoutStatus.confirmed, true, 'payout is not confirmed');
 
+const [browserFunding, browserPayout, browserPayoutStatus] = await Promise.all([
+  json(`${btcApi}/tx/${browserFundingTxid}`), json(`${btcApi}/tx/${browserPayoutTxid}`),
+  json(`${btcApi}/tx/${browserPayoutTxid}/status`),
+]);
+const browserFundedOutput = browserFunding.vout.findIndex((o) =>
+  o.scriptpubkey_address === browserAddress && o.value === 20_000);
+assert.notEqual(browserFundedOutput, -1, 'browser gift funding output missing');
+assert.ok(browserPayout.vin.some((i) => i.txid === browserFundingTxid &&
+  i.vout === browserFundedOutput), 'browser payout did not spend gift output');
+assert.ok(browserPayout.vout.some((o) => o.scriptpubkey_address === browserDestination &&
+  o.value === 19_750), 'browser payout destination or amount mismatch');
+const browserRawResponse = await fetch(`${btcApi}/tx/${browserPayoutTxid}/hex`);
+assert.equal(browserRawResponse.ok, true, 'browser payout raw transaction unavailable');
+const browserRawTx = bitcoinjs.Transaction.fromHex(await browserRawResponse.text());
+assert.equal(browserRawTx.getId(), browserPayoutTxid);
+assert.equal(browserRawTx.ins.length, 1);
+const browserScriptCode = bitcoinjs.payments.p2pkh({
+  pubkey: Buffer.from(browserPublicKey, 'hex'), network: bitcoinjs.networks.testnet,
+}).output;
+assert.equal(browserRawTx.hashForWitnessV0(0, browserScriptCode, 20_000,
+  bitcoinjs.Transaction.SIGHASH_ALL).toString('hex'), browserGift.last_payload_hex,
+  'browser payout sighash differs from NEAR-stored digest');
+assert.equal(browserRawTx.ins[0].witness[1].toString('hex'), browserPublicKey,
+  'browser payout witness key differs from derived gift key');
+const browserWitness = bitcoinjs.script.signature.decode(browserRawTx.ins[0].witness[0]);
+assert.equal(browserWitness.hashType, bitcoinjs.Transaction.SIGHASH_ALL);
+const browserMpcSignature = JSON.parse(browserGift.last_signature);
+assert.equal(browserWitness.signature.subarray(0, 32).toString('hex'),
+  browserMpcSignature.big_r.affine_point.slice(2), 'browser witness r differs from MPC signature');
+assert.equal(browserWitness.signature.subarray(32).toString('hex'),
+  browserMpcSignature.s.scalar, 'browser witness s differs from MPC signature');
+
 console.log(JSON.stringify({ result: 'PASS', gift_id: gift.id, current_owner: gift.owner_id,
   gift_btc_address: address, funded_sats: 100_000, paid_sats: 99_750,
   fee_sats: funding.vout[fundedOutput].value - 99_750,
@@ -144,4 +204,8 @@ console.log(JSON.stringify({ result: 'PASS', gift_id: prize.id, current_owner: p
   confirmed_block_height: prizeStatus.block_height ?? null }, null, 2));
 console.log(JSON.stringify({ result: 'PASS', gift_id: browserGift.id, current_owner: browserGift.owner_id,
   browser_mint_txid: browserMintTx, browser_transfer_txid: browserTransferTx,
-  scope: 'Final NEAR transactions and current gift state; browser interaction is documented by screenshot, not independently attested by RPC.' }, null, 2));
+  browser_sign_txid: browserSignTx, gift_btc_address: browserAddress,
+  funded_sats: 20_000, paid_sats: 19_750, fee_sats: 250,
+  payout_txid: browserPayoutTxid, payout_confirmed: browserPayoutStatus.confirmed,
+  confirmed_block_height: browserPayoutStatus.block_height ?? null,
+  scope: 'Public NEAR and Bitcoin records verify the handoff; browser actions are documented by screenshots and reproduced by an independent CLI transaction build.' }, null, 2));
