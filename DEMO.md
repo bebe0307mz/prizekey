@@ -8,8 +8,8 @@
 
 **65–90s — Why NEAR.** The gift contract checks its current owner before requesting the Chain Signatures MPC signature; Bitcoin receives an ordinary native transaction. No bridge or wrapped token. End with `pnpm verify:public` reporting gift #0's completed payout and gift #1's still-funded UTXO.
 
-For the final video, prefer a live action with a visible result: connect the organizer's NEAR testnet wallet, transfer a funded claim, and refresh to show its owner changed while the Bitcoin remains at the same native address. This has **not yet been recorded or verified in the browser**. If wallet connection is unavailable, show the CLI action and label it as such. A fresh redemption additionally needs a funded testnet4 UTXO and a recipient Bitcoin testnet4 address. Do not substitute a scripted claim for a wallet flow without labeling it.
+The NEAR CLI wallet option was exercised in the browser with gift #2: create and direct transfer both completed on NEAR testnet and appeared in the UI. It prompts for a terminal command and transaction hash, so label it a **browser-guided CLI signing flow**. Gift #2 is unfunded. For the final video, show the funded gift #1 and gift #0's historical payout, then the gift #2 screenshot and exact two transaction links. A fresh browser redemption still needs a funded testnet4 UTXO and a recipient Bitcoin testnet4 address; it remains unverified.
 
 ## Evidence and claims
 
-The first gift's complete handoff is verified on public test networks. The browser's wallet-connected create/transfer/redeem sequence still needs end-to-end UI verification. The testnet account currently has a privileged full-access key. State both limitations if asked; do not call the current deployment trustless or production safe.
+The first gift's complete handoff is verified on public test networks. Browser-guided create and transfer of gift #2 are also verified by final NEAR transactions. Browser redemption remains unverified. The testnet account currently has a privileged full-access key. State both limitations if asked; do not call the current deployment trustless or production safe.

@@ -6,7 +6,7 @@ This is an independent **NEAR testnet + Bitcoin testnet4** hackathon prototype. 
 
 The deployed contract's current code hash is `5sgjA6E1Bodfj69XCegYa7yNHdHkgzj8DE3YNrWXyBkc` ([upgrade transaction](https://testnet.nearblocks.io/txns/DYtiRkTwohWWiWV1mZjtjwo26G1hzVxdpQnr2nL1s14K)); it matches the local release WASM built from this source.
 
-**[Open the live demo](https://bebe0307mz.github.io/prizekey/).**
+**[Open the live demo](https://bebe0307mz.github.io/prizekey/)** · [Inspect the funded prize](https://bebe0307mz.github.io/prizekey/?gift=1#explore).
 
 The focused use case is a **native Bitcoin prize**: an organizer funds the prize before the winner has supplied a Bitcoin address. When a winner is known, the organizer transfers the claim. The winner later chooses a testnet4 address and redeems. The same mechanism can handle personal gifts.
 
@@ -18,7 +18,7 @@ The first gift was created, funded with 100,000 testnet4 sats, transferred to a 
 
 A second gift, **A Bitcoin prize**, is currently funded with a 100,000 sat testnet4 UTXO and remains transferable. It gives the public app a live unredeemed claim to inspect. Testnet4 confirmation status can change after a reorganization; the verifier reports the current status.
 
-The browser app reads live contract state and Bitcoin UTXOs. It offers wallet-connected creation, direct transfer, and a one-UTXO redemption flow. The on-chain demonstration was executed from the CLI; **we have not yet verified a full wallet-connected browser redemption**. The app does not provide Bitcoin testnet4 faucet funds or a Bitcoin wallet.
+The browser app reads live contract state and Bitcoin UTXOs. We connected its NEAR CLI wallet option, created gift #2 through the browser, signed the requested testnet transaction in the terminal, pasted its hash into the wallet panel, and then transferred that gift through the same browser flow. [The browser screenshot](evidence/browser-create-transfer-2026-11-11.png) shows the new owner; `pnpm verify:public` checks the two final transactions and contract state. This wallet option requires a terminal to sign; it is not an in-browser signer. The full Bitcoin handoff for gift #0 was executed from the CLI; **a browser redemption remains unverified**. The app does not provide Bitcoin testnet4 faucet funds or a Bitcoin wallet.
 
 ## Why NEAR
 
@@ -42,7 +42,7 @@ To create a fresh gift, connect a NEAR **testnet** wallet with at least 0.01 tes
 
 - [`contracts/gift/src/lib.rs`](contracts/gift/src/lib.rs): owner-gated gift creation, direct transfer, MPC signing request, asynchronous callback, and gift views.
 - [`src/App.jsx`](src/App.jsx): live testnet UI and browser-side Bitcoin transaction preparation, signing request, and broadcast.
-- [`scripts/verify-public.mjs`](scripts/verify-public.mjs): repeatable public-chain check for the first gift.
+- [`scripts/verify-public.mjs`](scripts/verify-public.mjs): repeatable public-chain checks for the completed Bitcoin handoff, funded prize, and browser-guided create/transfer transactions. Public RPC verifies transaction content and state; it cannot attest the browser interaction itself.
 
 This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` and approvals are absent. The contract does not parse or enforce the Bitcoin payout destination or fee: the holder authorizes a 32-byte digest, and the current browser prepares a one-input, one-output sweep with a fixed 250 sat fee. Anyone using the app should review the displayed destination and use only valueless test assets. A deployed full-access account key currently permits an account controller to replace the contract or bypass its policy; **do not treat this deployment as a trustless production vault**. We intend to remove that key only after the contract and demonstration are finalized. There is no automatic Bitcoin confirmation watcher or refund after redemption starts. Further funding after redemption can strand Bitcoin if the owner does not sign again. No mainnet or real-value flow has been tested.
 

@@ -9,6 +9,10 @@ const payoutTxid = 'f255c70347b79eacbe48209d9b9c70b56e0455b2c11983698df758ddf67d
 const prizeFundingTxid = 'b201de6a6bf2605fe06a05e920267a7327ab46c4bed6d65c1529e41c1ea2feef';
 const recipient = 'prizekey-recipient-11b.testnet';
 const destination = 'tb1qfmv0pfzuv0pu5fa570a8nrm7rs6jkpxkv0a6fj';
+const browserGiftId = '2';
+const browserCreator = 'prizekey-poc-11a7.testnet';
+const browserMintTx = '9FG1zzvcndTZS51w3J4UFWkUnVQnF1PSjRpwMS2ZDSE3';
+const browserTransferTx = 'C2Km3c5KkduLeRfv7tS9Kt829kNYmBnxj92CMg66iu4N';
 
 async function json(url, options) {
   const response = await fetch(url, options);
@@ -28,8 +32,58 @@ async function view(method, args) {
   return JSON.parse(Buffer.from(body.result.result).toString());
 }
 
+async function nearTx(hash, signer) {
+  const body = await json('https://rpc.testnet.near.org', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 'prizekey-verifier-tx', method: 'tx', params: [hash, signer] }),
+  });
+  assert.equal(body.error, undefined, JSON.stringify(body.error));
+  assert.equal(body.result.final_execution_status, 'FINAL', `${hash} not final`);
+  assert.ok(body.result.status?.SuccessValue != null, `${hash} failed`);
+  return body.result;
+}
+
+function assertNearAction(tx, method, args, deposit) {
+  assert.equal(tx.transaction.receiver_id, contract);
+  assert.equal(tx.transaction.actions.length, 1);
+  const action = tx.transaction.actions[0].FunctionCall;
+  assert.equal(action.method_name, method);
+  assert.deepEqual(JSON.parse(Buffer.from(action.args, 'base64').toString()), args);
+  assert.equal(action.deposit, deposit);
+}
+
+function hasNftEvent(tx, eventName, tokenId, ownerId, receiverId) {
+  return tx.receipts_outcome.some((receipt) => receipt.outcome.executor_id === contract &&
+    receipt.outcome.logs.some((line) => {
+      if (!line.startsWith('EVENT_JSON:')) return false;
+      const event = JSON.parse(line.slice('EVENT_JSON:'.length));
+      return event.standard === 'nep171' && event.event === eventName && event.data.some((entry) =>
+        entry.token_ids?.includes(tokenId) &&
+        (eventName === 'nft_mint' ? entry.owner_id === ownerId :
+          entry.old_owner_id === ownerId && entry.new_owner_id === receiverId));
+    }));
+}
+
 const gift = await view('gift', { token_id: '0' });
 const prize = await view('gift', { token_id: '1' });
+const browserGift = await view('gift', { token_id: browserGiftId });
+const [mintTx, transferTx] = await Promise.all([
+  nearTx(browserMintTx, browserCreator), nearTx(browserTransferTx, browserCreator),
+]);
+assert.equal(browserGift.owner_id, recipient);
+assert.equal(browserGift.redemption_started, false);
+assert.equal(browserGift.title, 'Browser flow check · 11 Nov');
+assert.equal(mintTx.transaction.signer_id, browserCreator);
+assert.equal(transferTx.transaction.signer_id, browserCreator);
+assertNearAction(mintTx, 'create_gift', {
+  title: 'Browser flow check · 11 Nov',
+  message: 'Created through the live PrizeKey browser app on NEAR testnet.',
+}, '10000000000000000000000');
+assertNearAction(transferTx, 'nft_transfer', {
+  receiver_id: recipient, token_id: browserGiftId,
+}, '1');
+assert.equal(hasNftEvent(mintTx, 'nft_mint', browserGiftId, browserCreator), true);
+assert.equal(hasNftEvent(transferTx, 'nft_transfer', browserGiftId, browserCreator, recipient), true);
 assert.equal(gift.owner_id, recipient);
 assert.equal(gift.redemption_started, true);
 assert.equal(gift.pending, false);
@@ -88,3 +142,6 @@ console.log(JSON.stringify({ result: 'PASS', gift_id: prize.id, current_owner: p
   live_funded_sats: 100_000, funding_txid: prizeFundingTxid,
   funding_confirmed: prizeStatus.confirmed,
   confirmed_block_height: prizeStatus.block_height ?? null }, null, 2));
+console.log(JSON.stringify({ result: 'PASS', gift_id: browserGift.id, current_owner: browserGift.owner_id,
+  browser_mint_txid: browserMintTx, browser_transfer_txid: browserTransferTx,
+  scope: 'Final NEAR transactions and current gift state; browser interaction is documented by screenshot, not independently attested by RPC.' }, null, 2));

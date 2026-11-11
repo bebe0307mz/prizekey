@@ -73,7 +73,10 @@ function App() {
   const [account, setAccount] = useState('');
   const [walletLoading, setWalletLoading] = useState(true);
   const [gifts, setGifts] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('gift');
+    return requested != null && /^\d+$/.test(requested) ? Number(requested) : null;
+  });
   const [address, setAddress] = useState('');
   const [publicKey, setPublicKey] = useState('');
   const [balance, setBalance] = useState(null);
