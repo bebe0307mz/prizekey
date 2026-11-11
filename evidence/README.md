@@ -17,3 +17,7 @@ The public verifier is `pnpm verify:public`. For gift #0, it checks the current 
 Testnet4 payout confirmed at block 160513. The recipient address is `tb1qfmv0pfzuv0pu5fa570a8nrm7rs6jkpxkv0a6fj`. Both networks' assets here are valueless test assets.
 
 `claim-local.json` and `poc-spend-local.json` are local transaction preparation files. They are excluded from Git because they contain operational records and are unnecessary to verify the public result.
+
+## Demo screenshots
+
+The [hero](demo-hero.png), [funded transferable prize](demo-funded-gift.png), [completed gift](demo-redeemed-gift.png), and [public proof links](demo-proof.png) were captured from the local app on 11 November. They show the same live public testnet state read by the hosted demo. The completed gift is a previously recorded transaction; these still images do not prove a wallet-connected browser redemption.
