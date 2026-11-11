@@ -1,0 +1,9 @@
+node_modules/
+dist/
+target/
+.env
+.env.*
+!.env.example
+.near-credentials/
+evidence/*-local.json
+.DS_Store

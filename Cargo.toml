@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = ["contracts/gift"]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.86"
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+panic = "abort"
+overflow-checks = true
