@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NearConnector } from '@hot-labs/near-connect';
-import { contracts, chainAdapters } from 'chainsig.js';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Bitcoin, Check, CircleHelp, Copy, ExternalLink, Gift, KeyRound, LockKeyhole, Menu, Send, ShieldCheck, Sparkles, Wallet, X } from 'lucide-react';
 
 const CONTRACT = 'prizekey-v1-11b.testnet';
@@ -9,11 +8,17 @@ const BTC_API = 'https://mempool.space/testnet4/api';
 const ONE_NEAR = 10n ** 24n;
 const GAS = '150000000000000';
 const connector = new NearConnector({ network: 'testnet', providers: { testnet: ['https://test.rpc.fastnear.com'] } });
-const signer = new contracts.ChainSignatureContract({ networkId: 'testnet', contractId: 'v1.signer-prod.testnet' });
-const bitcoin = new chainAdapters.btc.Bitcoin({
-  network: 'testnet', contract: signer,
-  btcRpcAdapter: new chainAdapters.btc.BTCRpcAdapters.Mempool(BTC_API),
-});
+let bitcoinClientPromise;
+function getBitcoinClient() {
+  bitcoinClientPromise ??= import('chainsig.js').then(({ contracts, chainAdapters }) => {
+    const signer = new contracts.ChainSignatureContract({ networkId: 'testnet', contractId: 'v1.signer-prod.testnet' });
+    return new chainAdapters.btc.Bitcoin({
+      network: 'testnet', contract: signer,
+      btcRpcAdapter: new chainAdapters.btc.BTCRpcAdapters.Mempool(BTC_API),
+    });
+  });
+  return bitcoinClientPromise;
+}
 
 async function view(method, args = {}) {
   const response = await fetch(NEAR_RPC, {
@@ -97,7 +102,7 @@ function App() {
     let active = true;
     setAddress(''); setPublicKey(''); setBalance(null);
     if (selectedId == null) return;
-    bitcoin.deriveAddressAndPublicKey(CONTRACT, `prizekey-btc-v1-${selectedId}`).then(async (derived) => {
+    getBitcoinClient().then((bitcoin) => bitcoin.deriveAddressAndPublicKey(CONTRACT, `prizekey-btc-v1-${selectedId}`)).then(async (derived) => {
       if (!active) return;
       setAddress(derived.address); setPublicKey(derived.publicKey);
       const response = await fetch(`${BTC_API}/address/${derived.address}/utxo`);
@@ -136,6 +141,7 @@ function App() {
     if (selected.redemption_started) throw new Error('Redemption has already started');
     if (!/^tb1[ac-hj-np-z02-9]{20,90}$/.test(destination)) throw new Error('Enter a Bitcoin testnet4 SegWit address');
     if (!address || !publicKey) throw new Error('Bitcoin gift address is still loading');
+    const bitcoin = await getBitcoinClient();
     const utxos = await (await fetch(`${BTC_API}/address/${address}/utxo`)).json();
     if (!Array.isArray(utxos) || utxos.length !== 1) throw new Error('This MVP redeems one Bitcoin UTXO per gift');
     const input = utxos[0];
@@ -168,6 +174,7 @@ function App() {
     if (gift.owner_id !== record.owner || gift.pending || gift.last_payload_hex !== record.payloadHex || !gift.last_signature)
       throw new Error('On-chain signature does not match the prepared Bitcoin payout');
     const sig = JSON.parse(gift.last_signature);
+    const bitcoin = await getBitcoinClient();
     const rsv = { r: sig.big_r.affine_point.slice(2), s: sig.s.scalar, v: sig.recovery_id + 27 };
     const rawTx = bitcoin.finalizeTransactionSigning({
       transaction: bitcoin.deserializeTransaction(record.serialized), rsvSignatures: [rsv],
