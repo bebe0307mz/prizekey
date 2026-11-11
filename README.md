@@ -10,6 +10,8 @@ The deployed contract's current code hash is `5sgjA6E1Bodfj69XCegYa7yNHdHkgzj8DE
 
 The focused use case is a **native Bitcoin prize**: an organizer funds the prize before the winner has supplied a Bitcoin address. When a winner is known, the organizer transfers the claim. The winner later chooses a testnet4 address and redeems. The same mechanism can handle personal gifts.
 
+PrizeKey fits the hackathon's **NFTs That Do Something** track: ownership of the claim changes who can request a native Bitcoin signature. Chain Signatures is the NEAR-specific mechanism. The project implements direct NFT transfer and views, with the interoperability limits stated below.
+
 ## What works today
 
 The first gift was created, funded with 100,000 testnet4 sats, transferred to a second NEAR account, and redeemed by that new holder for 99,750 sats (250 sat fee). The Bitcoin payout is confirmed. The original holder's attempt to request a signature after transfer was rejected by the contract. Run `pnpm verify:public` for an independent read of the public NEAR state and Bitcoin transactions. The [proof links](evidence/README.md) show each step.
