@@ -4,6 +4,8 @@
 
 This is an independent **NEAR testnet + Bitcoin testnet4** hackathon prototype. Both test assets have no monetary value. The live contract is [`prizekey-v1-11b.testnet`](https://testnet.nearblocks.io/address/prizekey-v1-11b.testnet).
 
+**[Open the live demo](https://bebe0307mz.github.io/prizekey/).**
+
 ## What works today
 
 The first gift was created, funded with 100,000 testnet4 sats, transferred to a second NEAR account, and redeemed by that new holder for 99,750 sats (250 sat fee). The Bitcoin payout is confirmed. The original holder's attempt to request a signature after transfer was rejected by the contract. Run `pnpm verify:public` for an independent read of the public NEAR state and Bitcoin transactions. The [proof links](evidence/README.md) show each step.
