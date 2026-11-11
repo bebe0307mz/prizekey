@@ -8,7 +8,7 @@
 
 **70–90s — Why NEAR.** The gift contract checks its current owner before requesting the Chain Signatures MPC signature; Bitcoin receives an ordinary native transaction. No bridge or wrapped token. End with `pnpm verify:public` reporting two Bitcoin payouts and gift #1's still-funded UTXO.
 
-Gift #2's payout was built in the browser and independently reconstructed by the CLI with the same Bitcoin transaction ID. The NEAR authorization used the browser's NEAR CLI option. Label the signing step accurately; the wallet was connected to the UI but transaction signing occurred in the terminal. The payout was broadcast on testnet4; its confirmation may lag or change after a reorganization.
+Gift #2's payout was built in the browser and independently reconstructed by the CLI with the same Bitcoin transaction ID. The NEAR authorization used the browser's NEAR CLI option. Label the signing step accurately; the wallet was connected to the UI but transaction signing occurred in the terminal. The payout confirmed in testnet4 block 160600 on 11 November; current confirmation should still be checked before recording because testnet reorganizations are possible.
 
 ## Evidence and claims
 
