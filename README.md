@@ -14,7 +14,7 @@ The focused use case is a **native Bitcoin prize**: an organizer funds the prize
 
 The first gift was created, funded with 100,000 testnet4 sats, transferred to a second NEAR account, and redeemed by that new holder for 99,750 sats (250 sat fee). The Bitcoin payout is confirmed. The original holder's attempt to request a signature after transfer was rejected by the contract. Run `pnpm verify:public` for an independent read of the public NEAR state and Bitcoin transactions. The [proof links](evidence/README.md) show each step.
 
-A second gift, **A Bitcoin prize**, is currently funded with 100,000 confirmed testnet4 sats and remains transferable. It gives the public app a live unredeemed claim to inspect.
+A second gift, **A Bitcoin prize**, is currently funded with a 100,000 sat testnet4 UTXO and remains transferable. It gives the public app a live unredeemed claim to inspect. Testnet4 confirmation status can change after a reorganization; the verifier reports the current status.
 
 The browser app reads live contract state and Bitcoin UTXOs. It offers wallet-connected creation, direct transfer, and a one-UTXO redemption flow. The on-chain demonstration was executed from the CLI; **we have not yet verified a full wallet-connected browser redemption**. The app does not provide Bitcoin testnet4 faucet funds or a Bitcoin wallet.
 

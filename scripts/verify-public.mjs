@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { contracts, chainAdapters } from 'chainsig.js';
+import bitcoinjs from 'bitcoinjs-lib';
 
 const contract = 'prizekey-v1-11b.testnet';
 const btcApi = 'https://mempool.space/testnet4/api';
@@ -40,7 +41,7 @@ assert.equal(prize.redemption_started, false);
 const signer = new contracts.ChainSignatureContract({ networkId: 'testnet', contractId: 'v1.signer-prod.testnet' });
 const bitcoin = new chainAdapters.btc.Bitcoin({ network: 'testnet', contract: signer,
   btcRpcAdapter: new chainAdapters.btc.BTCRpcAdapters.Mempool(btcApi) });
-const { address } = await bitcoin.deriveAddressAndPublicKey(contract, 'prizekey-btc-v1-0');
+const { address, publicKey } = await bitcoin.deriveAddressAndPublicKey(contract, 'prizekey-btc-v1-0');
 assert.equal(address, 'tb1qlnh99fd5amupc6tf65gh8a7eu37ujl94dj0cht');
 const { address: prizeAddress } = await bitcoin.deriveAddressAndPublicKey(contract, 'prizekey-btc-v1-1');
 assert.equal(prizeAddress, 'tb1qtwwe5nlkzpnv3tj8rd5gn4wjrn6nejve3flhfm');
@@ -49,12 +50,29 @@ const [funding, payout, payoutStatus] = await Promise.all([
   json(`${btcApi}/tx/${fundingTxid}`), json(`${btcApi}/tx/${payoutTxid}`),
   json(`${btcApi}/tx/${payoutTxid}/status`),
 ]);
+const rawResponse = await fetch(`${btcApi}/tx/${payoutTxid}/hex`);
+assert.equal(rawResponse.ok, true, 'payout raw transaction unavailable');
+const rawPayout = await rawResponse.text();
+const tx = bitcoinjs.Transaction.fromHex(rawPayout);
+assert.equal(tx.getId(), payoutTxid);
+assert.equal(tx.ins.length, 1);
+const scriptCode = bitcoinjs.payments.p2pkh({ pubkey: Buffer.from(publicKey, 'hex'),
+  network: bitcoinjs.networks.testnet }).output;
+assert.equal(tx.hashForWitnessV0(0, scriptCode, 100_000, bitcoinjs.Transaction.SIGHASH_ALL).toString('hex'),
+  gift.last_payload_hex, 'NEAR-stored digest differs from Bitcoin payout sighash');
+assert.equal(tx.ins[0].witness[1].toString('hex'), publicKey, 'Bitcoin witness key differs from derived gift key');
+const witness = bitcoinjs.script.signature.decode(tx.ins[0].witness[0]);
+assert.equal(witness.hashType, bitcoinjs.Transaction.SIGHASH_ALL);
+const mpcSignature = JSON.parse(gift.last_signature);
+assert.equal(witness.signature.subarray(0, 32).toString('hex'), mpcSignature.big_r.affine_point.slice(2),
+  'Bitcoin witness r differs from MPC signature');
+assert.equal(witness.signature.subarray(32).toString('hex'), mpcSignature.s.scalar,
+  'Bitcoin witness s differs from MPC signature');
 const [prizeUtxos, prizeStatus] = await Promise.all([
   json(`${btcApi}/address/${prizeAddress}/utxo`),
   json(`${btcApi}/tx/${prizeFundingTxid}/status`),
 ]);
 assert.ok(prizeUtxos.some((u) => u.txid === prizeFundingTxid && u.value === 100_000), 'live prize funding missing');
-assert.equal(prizeStatus.confirmed, true, 'prize funding is not confirmed');
 const fundedOutput = funding.vout.findIndex((o) => o.scriptpubkey_address === address && o.value === 100_000);
 assert.notEqual(fundedOutput, -1, 'funding output missing');
 assert.ok(payout.vin.some((i) => i.txid === fundingTxid && i.vout === fundedOutput), 'payout did not spend gift output');
@@ -68,4 +86,5 @@ console.log(JSON.stringify({ result: 'PASS', gift_id: gift.id, current_owner: gi
 console.log(JSON.stringify({ result: 'PASS', gift_id: prize.id, current_owner: prize.owner_id,
   transferable: !prize.redemption_started, gift_btc_address: prizeAddress,
   live_funded_sats: 100_000, funding_txid: prizeFundingTxid,
-  confirmed_block_height: prizeStatus.block_height }, null, 2));
+  funding_confirmed: prizeStatus.confirmed,
+  confirmed_block_height: prizeStatus.block_height ?? null }, null, 2));
