@@ -10,7 +10,7 @@ The NEAR steps used the browser wallet’s CLI option and required terminal sign
 
 ## Shot-by-shot edit map
 
-Simple cuts and short dissolves connect the shots. The working screen remains intact inside a consistent frame; captions sit below it. Screens are actual captures, never reconstructed success states. The first twelve seconds introduce the problem and solution; the remainder shows product execution and its public result.
+Simple cuts and short dissolves connect the shots. Actual screens appear inside a consistent frame; focused crops enlarge complete balance/holder cards and the Bitcoin receipt, while captions sit below them. Screens are actual captures, never reconstructed success states. The first twelve seconds introduce the problem and solution; the remainder shows product execution and its public result.
 
 | Seconds | Purpose | Actual visual |
 | --- | --- | --- |
@@ -19,9 +19,9 @@ Simple cuts and short dissolves connect the shots. The working screen remains in
 | 12.50–16.00 | 01 / CREATE | Create from the recorded Gift #3 workflow. |
 | 16.00–17.40 | 01 / CREATE | Created from the recorded Gift #3 workflow. |
 | 17.40–20.60 | 02 / FUND | Fund Address from the recorded Gift #3 workflow. |
-| 20.60–23.30 | 02 / FUND | Funded Result from the recorded Gift #3 workflow. |
+| 20.60–23.30 | 02 / FUND | Enlarged actual card: 20,000 sats, original holder and Gift #3 address. |
 | 23.30–27.45 | 03 / TRANSFER | Transfer from the recorded Gift #3 workflow. |
-| 27.45–30.40 | 03 / TRANSFER | Transfer Result from the recorded Gift #3 workflow. |
+| 27.45–30.40 | 03 / TRANSFER | Enlarged actual card: 20,000 sats, new CURRENT CLAIM HOLDER, same Gift #3 address before redemption. |
 | 30.40–34.40 | 04 / AUTHORIZE | Authorize from the recorded Gift #3 workflow. |
 | 34.40–36.50 | 04 / AUTHORIZE | Signature Ready from the recorded Gift #3 workflow. |
 | 36.50–41.30 | 05 / BROADCAST | Broadcast from the recorded Gift #3 workflow. |

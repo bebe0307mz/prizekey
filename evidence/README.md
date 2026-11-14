@@ -15,7 +15,7 @@ Run `pnpm verify:gift3` for a fresh read-only check. [The public manifest](gift3
 
 The verifier links the final NEAR actions/events to a live-root-derived Bitcoin key, then checks the raw payout sighash, witness key and MPC signature. It separately verifies the funding signature and the preserved Gift #1 UTXO. These are historical transactions; running the verifier neither signs nor broadcasts. No live old-holder rejection transaction was sent for Gift #3; owner gating is covered by contract unit tests. Captured product footage documents the browser-guided CLI wallet workflow, while RPC verifies public execution.
 
-The [current Gift #3 app proof](gift3-current-proof.png) and [public Bitcoin confirmation](gift3-bitcoin-confirmed.png) were captured during final production on 14 November.
+The [recorded new holder with 20,000 sats still funded](gift3-new-holder-funded.jpg) shows the same gift address before redemption. The [current Gift #3 app proof](gift3-current-proof.png) and [public Bitcoin confirmation](gift3-bitcoin-confirmed.png) were captured during final production on 14 November.
 
 ## Earlier handoffs
 
