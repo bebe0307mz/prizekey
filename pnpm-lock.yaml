@@ -17,6 +17,9 @@ importers:
       chainsig.js:
         specifier: 1.1.16
         version: 1.1.16(@near-js/tokens@2.5.1)(bufferutil@4.2.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
+      gsap:
+        specifier: 3.15.1
+        version: 3.15.1
       lucide-react:
         specifier: 0.468.0
         version: 0.468.0(react@18.3.1)
@@ -1201,6 +1204,9 @@ packages:
   graphql@16.15.0:
     resolution: {integrity: sha512-32kz9FecohDiC/tgcViwnRXM7HFBVTPiW7pHO+DikKOI5KjhU/jNULOReXsrFqt2WAYbE9xFXsTffJw6iTO8qw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
+
+  gsap@3.15.1:
+    resolution: {integrity: sha512-63yjWRFWj3QRP1UOuD8kcidCcy3nxb1mMRpwHr/xJRvPfm9GtWOXFAYUiL0ro1fgPq2nY53LR+98pAgy9BumBg==}
 
   has-property-descriptors@1.0.2:
     resolution: {integrity: sha512-55JNKuIW+vq4Ke1BjOTjM2YctQIvCT7GFzHwmfZPGo5wnrgkid0YQtnAleFSqumZm4az3n2BS+erby5ipJdgrg==}
@@ -3239,6 +3245,8 @@ snapshots:
       - graphql
 
   graphql@16.15.0: {}
+
+  gsap@3.15.1: {}
 
   has-property-descriptors@1.0.2:
     dependencies:

@@ -48,6 +48,8 @@ This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` 
 
 ## Hackathon demo
 
-See [DEMO.md](DEMO.md) for a 90-second walkthrough. PrizeKey is separate from [Orbit](https://github.com/bebe0307mz/orbit) and has its own contract, app, repository, and submission story.
+Watch the [33-second actual-app walkthrough](public/demo.mp4), or follow [DEMO.md](DEMO.md). PrizeKey is separate from [Orbit](https://github.com/bebe0307mz/orbit) and has its own contract, app, repository, and submission story.
 
 License: MIT.
+
+Presentation uses **GSAP 3.15.1** for brief transform/opacity animation, with reduced-motion support, under its [standard license](https://gsap.com/standard-license/). It does not determine chain state or payment outcomes.

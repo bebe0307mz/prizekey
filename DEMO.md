@@ -1,15 +1,28 @@
-# PrizeKey demo: 90 seconds
+# A Bitcoin gift, in 33 seconds
 
-**0–15s — Problem.** "A contest wants to announce a native Bitcoin prize today, but the winner has not supplied a Bitcoin address. How can the organizer fund it now and hand over control later?"
+[Watch the actual app](public/demo.mp4). The clip uses actual testnet reads, historical proof links, captions and narration generated from a provided team voice model. It does not create or redeem a new gift.
 
-**15–35s — Product.** Open the app on gift #1, **A Bitcoin prize**. Show its 100,000 sat UTXO and current NEAR owner. The organizer funded the prize's native Bitcoin address before knowing the final Bitcoin destination. The claim remains transferable.
+## Reproduce the moment
 
-**35–70s — Browser-guided handoff.** Show gift #2's recorded sequence: created in the browser, transferred to a second NEAR account, then funded with 20,000 testnet4 sats, authorized by that holder with Chain Signatures, and paid out as a native 19,750 sat Bitcoin transaction. Gift #1 separately demonstrates funding before the winner is known. Show the [before](evidence/browser-funded-before-redeem-2026-11-11.png) and [after](evidence/browser-redeem-result-2026-11-11.png) screenshots and the exact transaction links. The NEAR CLI wallet option required terminal commands and hash verification; the browser prepared and broadcast the Bitcoin payout.
+After the repository setup, start the preview:
 
-**70–90s — Why NEAR.** The gift contract checks its current owner before requesting the Chain Signatures MPC signature; Bitcoin receives an ordinary native transaction. No bridge or wrapped token. End with `pnpm verify:public` reporting two Bitcoin payouts and gift #1's still-funded UTXO.
+```sh
+pnpm exec vite --host 127.0.0.1 --port 4175 --strictPort
+```
 
-Gift #2's payout was built in the browser and independently reconstructed by the CLI with the same Bitcoin transaction ID. The NEAR authorization used the browser's NEAR CLI option. Label the signing step accurately; the wallet was connected to the UI but transaction signing occurred in the terminal. The payout confirmed in testnet4 block 160600 on 11 November; current confirmation should still be checked before recording because testnet reorganizations are possible.
+Open `http://127.0.0.1:4175/?gift=1#top`.
 
-## Evidence and claims
+1. **See a funded prize** (`[data-testid="funded-case"]`) selects gift #1. Its Bitcoin address currently has **100,000 test sats**, and the card identifies its current NEAR holder. This balance is a separate live UTXO read, not a fiat valuation.
+2. **See a completed handoff** (`[data-testid="redeemed-case"]`) selects the existing gift #2 case. Its card shows the **19,750-sat** recipient output from an already confirmed Bitcoin testnet4 transaction, block **160600**.
+3. Open **Proof** (`#proof`) to follow four real historical transactions: gift creation, NEAR claim transfer, holder authorization and Bitcoin payout. This case occurred on **11 November 2026**. It is not a newly completed transfer.
+4. The existing create, transfer and redeem tools remain available in disclosures. The recorded case used the browser's NEAR CLI option, which required terminal signing; it is not described as a wallet-only browser flow.
 
-Two gift handoffs are verified on public test networks. Gift #2 includes browser-guided create, transfer, authorization and browser Bitcoin broadcast. The testnet account currently has a privileged full-access key. Do not call the current deployment trustless or production safe.
+Exact payout: [586196…a8550](https://mempool.space/testnet4/tx/58619632aa1e44ce6e28cb838d4015046894585b1ca3e0e2ff463bcf016a8550). All assets are on Bitcoin testnet4 and NEAR testnet and have no monetary value.
+
+## Production and validation
+
+Actual browser footage was sampled about 10 times per second and encoded at 30 fps; captions and voice were added. No slides or fabricated success screens. [Desktop](evidence/bright-desktop.jpg) and [phone](evidence/bright-phone.jpg) were checked without horizontal overflow.
+
+Production build passed. A fresh Bitcoin read confirmed the exact historical recipient output. The full public verifier encountered an archival NEAR RPC **HTTP 408** during this update, so it is not reported as passing. Current state and BTC reads do not independently reverify all historical NEAR transactions. The original recorded proof remains available in the evidence directory.
+
+No contract, signing policy, wallet permission or key was changed. The administrator upgrade key and incomplete on-chain destination/fee binding remain material prototype limits; read the README before attempting any action. No transaction, publication or deployment was performed for this presentation update.
