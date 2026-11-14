@@ -1,6 +1,6 @@
 # PrizeKey — fund a prize, let the winner choose its destination
 
-[Watch the 70-second portrait demo](public/demo.mp4) · [1920×1080 landscape copy](public/demo-1080p.mp4) · [Spoken subtitles](public/demo.srt) · [Matching narration](DEMO-SCRIPT.md).
+[Watch the 64-second portrait demo (1.2×)](public/demo.mp4) · [1920×1080 landscape copy](public/demo-1080p.mp4) · [Spoken subtitles](public/demo.srt) · [Matching narration](DEMO-SCRIPT.md).
 
 The actual landing introduces the organizer’s problem and PrizeKey’s solution before the walkthrough. Its Create gift button opens the real form without submitting it. One completed gift carries the example: set Bitcoin aside before choosing the winner, transfer its NEAR claim, let that account choose a Bitcoin address, then inspect the delivered gift. The current app fills the mobile views. Original desktop transaction footage uses readable fixed crops and a small recorded-source label. The separate 100,000-sat unsigned preview has been removed from the video.
 
@@ -14,23 +14,23 @@ The opening shows the current task-oriented landing; the ending shows the curren
 
 ## Edit map
 
-| Time | Screen and story |
+| Final time | Screen and story |
 | --- | --- |
-| 0–7.6s | Actual landing: the organizer wants to set aside Bitcoin before knowing the winner or their Bitcoin address. |
-| 7.6–17s | Same landing: explain funding a gift first, transferring its NEAR claim, and letting the winner choose the Bitcoin destination. Tap Create gift to open the real form; do not submit it. |
-| 17–25s | Earlier test run: the same Gift #3 funded with 20,000 test sats and its Bitcoin address. |
-| 25–33s | Enter the winner’s NEAR account, recorded transfer approval, and actual changed holder. |
-| 33–40.8s | The holder chooses a Bitcoin address and approves the recorded payout. |
-| 40.8–49s | NEAR Chain Signatures authorization and genuine browser broadcast. Terminal-wallet approval is disclosed. |
-| 49–59s | Current recipient page: 19,750 test sats confirmed in block 161287, assigned recipient, completed-record notice and public-record tap. |
-| 59–66.8s | Current transaction record: confirmed-status tap and two real short scrolls. |
-| 66.8–70s | Closing reading hold on the same delivered gift. |
+| 0–6.4s | Actual landing: the giveaway is ready before the winner or their Bitcoin address is known. |
+| 6.4–14.2s | Explain PrizeKey’s solution on the landing, then tap Create gift without submitting. |
+| 14.2–20.8s | Earlier actual Gift #3: 20,000 test sats and its Bitcoin address. |
+| 20.8–27.5s | Recorded winner account entry, claim transfer and changed holder. |
+| 27.5–34s | The holder chooses a Bitcoin destination and approves the recorded payout. |
+| 34–40.8s | Recorded Chain Signatures authorization and browser broadcast; terminal-wallet use is disclosed. |
+| 40.8–49.2s | Current recipient: 19,750 test sats confirmed, assigned account and public-record tap. |
+| 49.2–54s | Current transaction details and public Bitcoin confirmation. |
+| 54–64.2s | Actual return to the landing. Explain NEAR claim ownership and Chain Signatures, then close on the winner choosing the destination. |
 
 ## Capture and validation
 
-The 70-second copies contain H.264 video and AAC Zoe QUICK narration, synchronized ordinary captions, and complete voice takes without speed modification. The current mobile capture uses a real 393×780 responsive viewport; historical signed actions retain their actual desktop source. Fixed crops preserve recorded UI. Brief reading holds and genuine inactive-wait cuts are editorial edits, not simulated scrolling. The delivered gift at the end is an editorial return to an already inspected result.
+The 64.17-second copies contain H.264 video and AAC Zoe QUICK narration, synchronized ordinary captions, and complete retained utterances, then a full 1.2× speed increase with pitch-preserving audio tempo adjustment. Caption times follow the same speed change. The current mobile capture uses a real 393×780 responsive viewport; historical signed actions retain their actual desktop source. Fixed crops preserve recorded UI. Brief reading holds and genuine inactive-wait cuts are editorial edits, not simulated scrolling. The ending uses actual footer-brand navigation and a native Home key to return from the public record to the landing. The full edit intentionally runs at 1.2×; source motion is accelerated rather than presented as native realtime.
 
-The new opening captures average about 14–16 source frames/sec. The retained recipient captures average about 6/sec, and earlier transaction captures about 10/sec. The 30fps container repeats frames; some scrolls step abruptly. No native 30/60fps recording, fabricated intermediate UI or physical touchscreen capture is claimed. The main revision adds the requested landing explanation of the problem and solution, while preserving one-gift continuity, readable app views and action-linked narration.
+The new opening captures average about 14–16 source frames/sec. The retained recipient captures average about 6/sec, and earlier transaction captures about 10/sec. The 30fps container repeats frames; some scrolls step abruptly. No native 30/60fps recording, fabricated intermediate UI or physical touchscreen capture is claimed. The opening now uses shorter, more upbeat phrasing. Captions are raised above the controls and adjusted around key app content. The ending returns to the landing and explains how NEAR tracks the claim’s owner and how Chain Signatures enables a native Bitcoin payout.
 
 Checks include both complete-file decodes, encoded frame inspection, caption bounds/overlap checks, full narration-duration checks and ASR word timing. Product and contract checks are documented in the README; this edit changes media and documentation only.
 

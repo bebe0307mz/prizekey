@@ -1,12 +1,14 @@
-# PrizeKey — problem, solution, gift walkthrough
+# PrizeKey — energetic opening, NEAR closing
 
-70 seconds. Zoe QUICK uses her existing authorized voice model. The opening is the real current landing page, with separate phone and desktop captures. It introduces the problem, explains the solution and opens the Create gift form without submitting it. The remaining walkthrough preserves actual Gift #3 evidence, with original desktop execution labeled **Recorded test · earlier UI**.
+64.17 seconds. The full77-second edit is played at1.2×, with pitch-preserving audio tempo adjustment and matching caption times. Zoe QUICK uses her existing authorized voice model. The two opening takes and the NEAR closing were generated with upbeat, confident delivery.
 
-## Narration
+The actual landing introduces the problem and solution, and its Create gift action only opens the form. Original Gift #3 desktop execution remains labeled **Recorded test · earlier UI**. The ending genuinely returns from the payout record to the public landing.
 
-I want to fund a Bitcoin prize today, but I don't know who'll win, or which wallet they'll use.
+## Spoken narration
 
-With PrizeKey, I fund a gift first, pass its NEAR claim to the winner, and let them choose where Bitcoin goes. Let me show you.
+I want to give away Bitcoin. The prize is ready, but I don't know the winner yet. Or their Bitcoin address.
+
+That's why I built PrizeKey. Set up the gift first, pass its claim on NEAR to the winner, and let them choose their Bitcoin address. Let me show you.
 
 In this earlier test, I funded a gift with twenty thousand test sats. It has its own Bitcoin address.
 
@@ -18,20 +20,22 @@ NEAR Chain Signatures authorizes it, then the browser sends Bitcoin. This earlie
 
 Here's what the recipient sees today. Nineteen thousand seven hundred fifty test sats delivered, after a two hundred fifty sat fee.
 
-If they want to check, the transaction is right here. Fund the prize first. Let the winner choose where it goes.
+If they want to check, the transaction is right here.
+
+Fund the prize first. NEAR tracks who owns the claim. Chain Signatures lets that person approve a native Bitcoin payout. The winner chooses where it goes.
 
 ## Edit map
 
-| Time | Screen and story |
+| Final time | Screen and story |
 | --- | --- |
-| 0–7.6s | Actual landing: the organizer wants to set aside Bitcoin before knowing the winner or their Bitcoin address. |
-| 7.6–17s | Same landing: explain funding a gift first, transferring its NEAR claim, and letting the winner choose the Bitcoin destination. Tap Create gift to open the real form; do not submit it. |
-| 17–25s | Earlier test run: the same Gift #3 funded with 20,000 test sats and its Bitcoin address. |
-| 25–33s | Enter the winner’s NEAR account, recorded transfer approval, and actual changed holder. |
-| 33–40.8s | The holder chooses a Bitcoin address and approves the recorded payout. |
-| 40.8–49s | NEAR Chain Signatures authorization and genuine browser broadcast. Terminal-wallet approval is disclosed. |
-| 49–59s | Current recipient page: 19,750 test sats confirmed in block 161287, assigned recipient, completed-record notice and public-record tap. |
-| 59–66.8s | Current transaction record: confirmed-status tap and two real short scrolls. |
-| 66.8–70s | Closing reading hold on the same delivered gift. |
+| 0–6.4s | Actual landing: the giveaway is ready before the winner or their Bitcoin address is known. |
+| 6.4–14.2s | Explain PrizeKey’s solution on the landing, then tap Create gift without submitting. |
+| 14.2–20.8s | Earlier actual Gift #3: 20,000 test sats and its Bitcoin address. |
+| 20.8–27.5s | Recorded winner account entry, claim transfer and changed holder. |
+| 27.5–34s | The holder chooses a Bitcoin destination and approves the recorded payout. |
+| 34–40.8s | Recorded Chain Signatures authorization and browser broadcast; terminal-wallet use is disclosed. |
+| 40.8–49.2s | Current recipient: 19,750 test sats confirmed, assigned account and public-record tap. |
+| 49.2–54s | Current transaction details and public Bitcoin confirmation. |
+| 54–64.2s | Actual return to the landing. Explain NEAR claim ownership and Chain Signatures, then close on the winner choosing the destination. |
 
-The opening follows the user’s requested problem → solution → actual walkthrough structure. The app keeps the introduction concise and retains the primary gift controls. There are no explanatory slides. Portrait uses fixed vertical regions of genuine desktop transaction footage; those are not newly performed phone transactions. No new creation, signing, transfer or broadcast was performed for this edit.
+Captions sit above the player controls. Their position adjusts in the funded-gift view to keep the balance, receiver field and Transfer claim button readable. All retained spoken sentences are complete. The older outro was split at silence after “the transaction is right here” and replaced with the new NEAR closing. No new creation, signing, transfer or broadcast was performed.
