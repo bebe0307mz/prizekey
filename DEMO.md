@@ -1,6 +1,8 @@
-# PrizeKey — fund Bitcoin now, choose the recipient later
+# PrizeKey — recorded transaction walkthrough
 
-[Watch the finished 63-second demo](public/demo.mp4). 1920×1080, H.264/AAC, 30 fps. Zoe QUICK narration uses her existing authorized model. [Subtitles](public/demo.srt) are ordinary spoken captions and are also burned into the video.
+[Watch the recorded 63-second transaction demo](public/demo.mp4). 1920×1080, H.264/AAC, 30 fps. Zoe QUICK narration uses her existing authorized model. [Subtitles](public/demo.srt) are ordinary spoken captions and are also burned into the video.
+
+This recording uses the earlier app layout. The current working product opens on a gift manager with an independent recipient page. Its refreshed presentation is specified in [DEMO-SCRIPT.md](DEMO-SCRIPT.md); this historical clip is evidence of the executed transactions, not a claim that new signing steps were tested.
 
 ## What the recording proves
 
@@ -30,7 +32,7 @@ Simple cuts and short dissolves connect the shots. Actual screens appear inside 
 | 52.80–57.10 | THE COMPLETE HANDOFF | Actual current app proof links and holder/balance. |
 | 57.10–63.00 | PRIZEKEY | Original value statement. |
 
-## Final narration
+## Recorded narration
 
 I'm Zoe. Prize organizers may need to fund Bitcoin before they know the winner, or the winner's Bitcoin address.
 
@@ -53,12 +55,13 @@ This is a testnet prototype with an admin upgrade key. Fund first, pass the clai
 ```sh
 pnpm install --frozen-lockfile
 pnpm build
+pnpm test:recipient
 pnpm test:contract
 pnpm verify:gift3
 pnpm verify:public
 pnpm exec vite --host 127.0.0.1 --port 4175 --strictPort
 ```
 
-Open `http://127.0.0.1:4175/?gift=3#desk-title` to inspect the current recipient and zero remaining gift balance, then the proof section. Open `?gift=1#top` to inspect the separate, still-funded 100,000-sat transferable claim. These views do not create, transfer, authorize or broadcast. To repeat transactions, obtain a new explicitly bounded authorization; the completed Gift #3 run must not be repeated.
+Open `http://127.0.0.1:4175/?gift=3#desk-title` to inspect the current recipient and zero remaining gift balance, then Transaction details. Open `http://127.0.0.1:4175/?claim=3` for its dedicated recipient/status page. Open `?gift=1#top` to inspect the separate, still-funded 100,000-sat transferable claim. These views do not create, transfer, authorize or broadcast. To repeat transactions, obtain a new explicitly bounded authorization; the completed Gift #3 run must not be repeated.
 
 Public verification inputs and dated outputs are under [evidence](evidence/README.md). Final local changes and video require a separately approved push before they appear on GitHub Pages. No X post or submission is created by this repository.

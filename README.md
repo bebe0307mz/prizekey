@@ -12,11 +12,21 @@ The focused use case is a **native Bitcoin prize**: an organizer funds the prize
 
 PrizeKey fits the hackathon's **NFTs That Do Something** track: ownership of the claim changes who can request a native Bitcoin signature. Chain Signatures is the NEAR-specific mechanism. The project implements direct NFT transfer and views, with the interoperability limits stated below.
 
+## Gift manager and recipient page
+
+The app opens on gifts and their balances, with controls to create a gift, transfer a claim, open its recipient page, and inspect transaction status. Supporting historical evidence is inside **Transaction details**; the organizer workspace is independent of the video.
+
+A `?claim=3` link opens only that gift’s recipient page. It reads the exact gift directly, including gifts older than the recent list. The link grants no ownership. The sender must transfer to the recipient’s NEAR account, and only that account may approve a payout. Localhost links are labeled **local previews** and are not public redeem links.
+
+The recipient sees the note, assigned account, balance, net amount and fixed 250-sat fee. **Review my payout** only prepares an unsigned transaction; **Approve in my wallet** is a separate action and rechecks ownership and the funding input. The subsequent broadcast is also explicit. Tests cover older links, invalid/missing gifts, wrong accounts, cached records and truthful pending/delivered states.
+
+The installed connector currently offers ordinary testnet wallet choices alongside NEAR CLI. Their presence is not proof of a tested terminal-free redemption. The recorded execution used NEAR CLI and terminal signing; the new read-only review was exercised without sending another transaction. Recipients still need an assigned NEAR account and testnet gas.
+
 ## What works today
 
 **Gift #3 is the complete recorded product run:** create a NEAR claim, fund its Bitcoin address with 20,000 testnet4 sats, transfer the claim to a second account, authorize as that holder, and broadcast 19,750 native testnet4 sats to the chosen destination. The payout was confirmed in block **161287** when checked on 14 November 2026. Confirmation is a dated observation; testnet reorganizations can change it.
 
-[Watch the finished demo](public/demo.mp4) · [Read the shot map and narration](DEMO.md) · [Inspect every transaction](evidence/README.md) · [Saved verification result](evidence/gift3-verification.json).
+[Watch the recorded transaction demo](public/demo.mp4) · [Read the recorded flow](DEMO.md) · [Inspect every transaction](evidence/README.md) · [Saved verification result](evidence/gift3-verification.json).
 
 ```sh
 pnpm verify:gift3
@@ -42,7 +52,7 @@ pnpm dev
 # open the localhost URL printed by Vite
 ```
 
-Vite prints the actual port if 5175 is occupied. `pnpm build` builds the frontend. `cargo test -p prizekey-gift --lib` runs the contract unit tests; `cargo build --target wasm32-unknown-unknown --release -p prizekey-gift` builds its WASM. `pnpm verify:gift3` checks the recorded demo; `pnpm verify:public` checks historical handoffs. Both query public NEAR and Bitcoin testnet4 APIs with bounded timeouts and NEAR RPC fallback. No local wallet secrets are needed for read-only verification.
+Vite prints the actual port if 5175 is occupied. `pnpm build` builds the frontend. `pnpm test:recipient` runs recipient-link and ownership-state regressions. `cargo test -p prizekey-gift --lib` runs the contract unit tests; `cargo build --target wasm32-unknown-unknown --release -p prizekey-gift` builds its WASM. `pnpm verify:gift3` checks the recorded demo; `pnpm verify:public` checks historical handoffs. Both query public NEAR and Bitcoin testnet4 APIs with bounded timeouts and NEAR RPC fallback. No local wallet secrets are needed for read-only verification.
 
 To create a fresh gift, connect a NEAR **testnet** wallet with at least 0.01 testnet NEAR, create the gift, fund the displayed Bitcoin **testnet4** address, then transfer the claim. The new holder can redeem one UTXO to a `tb1…` testnet4 address. The gift locks against transfer as soon as a signing request starts, including if the signing callback later fails. The CLI alternative is `DESTINATION_BTC=tb1... TOKEN_ID=1 pnpm claim prepare`, owner calling `request_btc_signature` with the displayed digest, then `pnpm claim broadcast`. CLI records are written under `evidence/*-local.json` and ignored by Git.
 
@@ -56,7 +66,7 @@ This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` 
 
 ## Hackathon demo
 
-Watch the [finished narrated product demo](public/demo.mp4), or follow [DEMO.md](DEMO.md). It reuses the actual Gift #3 execution, trims genuine network/wallet waits, and ends on independently checked Bitcoin confirmation. It performs no new transaction during playback.
+Watch the [recorded narrated transaction demo](public/demo.mp4), or follow [DEMO.md](DEMO.md). It preserves the actual Gift #3 execution using the previous app layout, trims genuine network/wallet waits, and ends on independently checked Bitcoin confirmation. The current product uses a task-based manager and dedicated recipient page; refreshed presentation captures must match that layout. [The current production script](DEMO-SCRIPT.md) describes this separation. It performs no new transaction during playback.
 
 The published [GitHub Pages demo](https://bebe0307mz.github.io/prizekey/) reflects the last published revision; local final production changes require a separately authorized push and Pages build. Use the local setup above to inspect this revision.
 

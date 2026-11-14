@@ -11,7 +11,8 @@
     "test:contract": "cargo test -p prizekey-gift --lib",
     "claim": "node scripts/claim.mjs",
     "verify:public": "node scripts/verify-public.mjs",
-    "verify:gift3": "node scripts/verify-gift3.mjs"
+    "verify:gift3": "node scripts/verify-gift3.mjs",
+    "test:recipient": "node --test tests/claim-state.test.mjs"
   },
   "keywords": [],
   "author": "",

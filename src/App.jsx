@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import ClaimPage from './ClaimPage.jsx';
+import { parseGiftRoute, recipientLink, loadGiftRows, readPreparedClaim } from './claim-state.mjs';
 import { NearConnector } from '@hot-labs/near-connect';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Bitcoin, Check, CircleHelp, Copy, ExternalLink, Gift, KeyRound, LockKeyhole, Menu, Send, ShieldCheck, Sparkles, Wallet, X } from 'lucide-react';
 
 const CONTRACT = 'prizekey-v1-11b.testnet';
-const NEAR_RPCS = ['https://rpc.testnet.near.org', 'https://test.rpc.fastnear.com'];
+const NEAR_RPCS = ['https://archival-rpc.testnet.near.org', 'https://rpc.testnet.near.org', 'https://test.rpc.fastnear.com'];
+const pendingReads = new Map();
 const RECORDED_GIFT = { id: 3, date: '14 November 2026', mint: 'Ba34Sf3JotwDxCw7JKkMB8FPKVWCYqJJY6yJZQYVMa4D', transfer: '4aJDiiWDpYtuCVv2i562sZANwKgz7ffjBrWoLo7Kw3UB', sign: 'CxYuo541g6f34tGKvR2iScPps1T6L2gUCSxySMrpLQMA', payout: '665a155eba10da7f8219cbc5077da5d63070be3e9b2e7da4dbbaf2e27b8ad931', destination: 'tb1q40tm8unf8g7lcg4cmg47fhmhhyssnuqfqaesr5' };
 const BTC_API = 'https://mempool.space/testnet4/api';
 const ONE_NEAR = 10n ** 24n;
@@ -22,7 +25,7 @@ function getBitcoinClient() {
   return bitcoinClientPromise;
 }
 
-async function view(method, args = {}) {
+async function readView(method, args = {}) {
   let lastError;
   for (const rpc of NEAR_RPCS) {
     try {
@@ -41,6 +44,12 @@ async function view(method, args = {}) {
     } catch (error) { lastError = error; }
   }
   throw new Error(`Public NEAR reads unavailable: ${lastError?.message || 'please retry'}`);
+}
+
+function view(method, args = {}) {
+  const key = JSON.stringify([method, args]);
+  if (!pendingReads.has(key)) pendingReads.set(key, readView(method, args).finally(() => pendingReads.delete(key)));
+  return pendingReads.get(key);
 }
 
 async function call(method, args, deposit = '0', gas = GAS) {
@@ -80,13 +89,16 @@ function CopyButton({ value, label = 'Copy' }) {
 }
 
 function App() {
+  const route = useMemo(() => parseGiftRoute(window.location.search), []);
   const [account, setAccount] = useState('');
+  const [walletInfo, setWalletInfo] = useState(null);
+  const [reviewRecord, setReviewRecord] = useState(null);
   const [walletLoading, setWalletLoading] = useState(true);
   const [gifts, setGifts] = useState([]);
-  const [selectedId, setSelectedId] = useState(() => {
-    const requested = new URLSearchParams(window.location.search).get('gift');
-    return requested != null && /^\d+$/.test(requested) ? Number(requested) : 1;
-  });
+  const [selectedId, setSelectedId] = useState(route.id);
+  const selectedIdRef = useRef(route.id);
+  const refreshRequest = useRef(0);
+  selectedIdRef.current = selectedId;
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [address, setAddress] = useState('');
   const [publicKey, setPublicKey] = useState('');
@@ -101,6 +113,7 @@ function App() {
   const [lastTx, setLastTx] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(() => window.location.hash === '#create');
+  const [transactionsOpen, setTransactionsOpen] = useState(() => ['#transactions', '#proof'].includes(window.location.hash));
   const [payout, setPayout] = useState(null);
   const [payoutError, setPayoutError] = useState('');
   const [readAt, setReadAt] = useState(null);
@@ -110,23 +123,26 @@ function App() {
   const isOwner = !!selected && account === selected.owner_id;
 
   const refresh = useCallback(async (preferredId = null) => {
-    const total = await view('total_gifts');
-    const ids = Array.from({ length: Math.min(total, 24) }, (_, i) => total - 1 - i);
-    const rows = await Promise.all(ids.map((id) => view('gift', { token_id: String(id) })));
+    const request = ++refreshRequest.current;
+    let rows;
+    try { rows = await loadGiftRows(view, route, preferredId ?? selectedIdRef.current); }
+    catch (error) { if (request === refreshRequest.current) throw error; return; }
+    if (request !== refreshRequest.current) return;
+    setError('');
     setGifts(rows.filter(Boolean));
     setReadAt(new Date());
     setSelectedId((current) => preferredId ?? current ??
       (rows.find((gift) => gift && !gift.redemption_started)?.id ?? rows[0]?.id ?? null));
     setRefreshNonce((current) => current + 1);
-  }, []);
+  }, [route]);
 
   useEffect(() => {
     let active = true;
-    const signedIn = ({ accounts }) => { if (active) setAccount(accounts[0]?.accountId ?? ''); };
-    const signedOut = () => { if (active) setAccount(''); };
+    const signedIn = ({ accounts, wallet }) => { if (active) { setAccount(accounts[0]?.accountId ?? ''); setWalletInfo(wallet?.manifest ?? null); } };
+    const signedOut = () => { if (active) { setAccount(''); setWalletInfo(null); } };
     connector.on('wallet:signIn', signedIn);
     connector.on('wallet:signOut', signedOut);
-    connector.getConnectedWallet().then((w) => { if (active) setAccount(w?.accounts[0]?.accountId ?? ''); })
+    connector.getConnectedWallet().then((w) => { if (active) { setAccount(w?.accounts[0]?.accountId ?? ''); setWalletInfo(w?.wallet.manifest ?? null); } })
       .catch(() => {}).finally(() => { if (active) setWalletLoading(false); });
     refresh().catch((e) => setError(e.message));
     return () => { active = false; connector.off('wallet:signIn', signedIn); connector.off('wallet:signOut', signedOut); };
@@ -135,7 +151,7 @@ function App() {
   useEffect(() => {
     let active = true;
     setAddress(''); setPublicKey(''); setBalance(null);
-    if (selectedId == null) return;
+    if (selectedId == null || !selected) return;
     getBitcoinClient().then((bitcoin) => bitcoin.deriveAddressAndPublicKey(CONTRACT, `prizekey-btc-v1-${selectedId}`)).then(async (derived) => {
       if (!active) return;
       setAddress(derived.address); setPublicKey(derived.publicKey);
@@ -145,12 +161,15 @@ function App() {
       if (active && Array.isArray(utxos)) setBalance(utxos.reduce((n, u) => n + u.value, 0));
     }).catch((e) => { if (active) setError(`Bitcoin address lookup: ${e.message}`); });
     return () => { active = false; };
-  }, [selectedId, refreshNonce]);
+  }, [selectedId, refreshNonce, !!selected]);
+
+  useEffect(() => { setReviewRecord(null); }, [selectedId, account, destination]);
 
   useEffect(() => {
+    if (route.claim) return;
     const context = gsap.context(() => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      gsap.from('.hero-copy > *, .gift-stage', { y: 18, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out', clearProps: 'all' });
+      gsap.from('.section-head', { y: 18, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out', clearProps: 'all' });
     }, appRef);
     return () => context.revert();
   }, []);
@@ -170,7 +189,7 @@ function App() {
 
   const run = async (label, fn) => {
     setBusy(label); setError(''); setNotice('');
-    try { await fn(); } catch (e) { setError(e.message || String(e)); }
+    try { await fn(); } catch (e) { if (label === 'Connecting wallet' && /reject|cancel|closed/i.test(e.message ?? '')) setNotice('Wallet selection closed.'); else setError(e.message || String(e)); }
     finally { setBusy(''); }
   };
 
@@ -205,10 +224,17 @@ function App() {
     if (!/^tb1[ac-hj-np-z02-9]{20,90}$/.test(destination)) throw new Error('Enter a Bitcoin testnet4 SegWit address');
     if (!address || !publicKey) throw new Error('Bitcoin gift address is still loading');
     const bitcoin = await getBitcoinClient();
-    const utxos = await (await fetch(`${BTC_API}/address/${address}/utxo`)).json();
+    const liveGift = await view('gift', { token_id: String(selected.id) });
+    if (liveGift?.owner_id !== account || liveGift.pending) throw new Error('The gift holder or approval status changed. Refresh before continuing.');
+    const utxoResponse = await fetch(`${BTC_API}/address/${address}/utxo`, { signal: AbortSignal.timeout(12000) });
+    if (!utxoResponse.ok) throw new Error('The Bitcoin balance could not be checked. Please retry.');
+    const utxos = await utxoResponse.json();
     if (!Array.isArray(utxos) || utxos.length !== 1) throw new Error('This MVP redeems one Bitcoin UTXO per gift');
     const input = utxos[0];
-    const parent = await (await fetch(`${BTC_API}/tx/${input.txid}`)).json();
+    const parentResponse = await fetch(`${BTC_API}/tx/${input.txid}`, { signal: AbortSignal.timeout(12000) });
+    if (!parentResponse.ok) throw new Error('The funding transaction could not be checked. Please retry.');
+    const parent = await parentResponse.json();
+    if (parent.vout?.[input.vout]?.scriptpubkey_address !== address || parent.vout[input.vout].value !== input.value) throw new Error('Funding output does not match this gift. Refresh before continuing.');
     const fee = 250;
     if (input.value <= fee + 546) throw new Error('Gift balance is too small for a Bitcoin payout');
     const amount = input.value - fee;
@@ -222,19 +248,34 @@ function App() {
     const payloadHex = Buffer.from(hashesToSign[0]).toString('hex');
     const record = { contract: CONTRACT, tokenId: String(selected.id), owner: account, source: address,
       destination, amount, fee, payloadHex, serialized: bitcoin.serializeTransaction(transaction) };
-    localStorage.setItem(claimStorageKey(selected.id), JSON.stringify(record));
-    const tx = await call('request_btc_signature', { token_id: String(selected.id), payload_hex: payloadHex }, '0', GAS);
-    setLastTx({ label: 'Bitcoin signing request sent on NEAR', hash: tx.transaction.hash });
-    try { await waitForSignature(String(selected.id), payloadHex, selected.request_id); }
-    finally { await refresh(selected.id); }
-    setLastTx({ label: 'Bitcoin signature authorized on NEAR', hash: tx.transaction.hash });
-    setNotice('The NEAR contract signed your Bitcoin payout. Broadcast it below.');
+    record.input = { txid: input.txid, vout: input.vout, value: input.value };
+    setReviewRecord(record);
   }); };
+
+  const authorizeReviewed = () => run('Approving Bitcoin payout', async () => {
+    const record = reviewRecord;
+    if (!record || record.contract !== CONTRACT || record.tokenId !== String(selected?.id) || record.owner !== account || record.destination !== destination) throw new Error('Review this payout again before approving.');
+    const gift = await view('gift', { token_id: record.tokenId });
+    if (gift.owner_id !== account || gift.pending) throw new Error('Only the current holder can approve this gift. Refresh and review again.');
+    const response = await fetch(`${BTC_API}/address/${record.source}/utxo`, { signal: AbortSignal.timeout(12000) });
+    if (!response.ok) throw new Error('Could not recheck the gift balance. Please retry.');
+    const currentInputs = await response.json();
+    if (currentInputs.length !== 1 || currentInputs[0].txid !== record.input.txid || currentInputs[0].vout !== record.input.vout || currentInputs[0].value !== record.input.value) throw new Error('The gift balance changed. Review the payout again.');
+    localStorage.setItem(claimStorageKey(selected.id), JSON.stringify(record));
+    const tx = await call('request_btc_signature', { token_id: record.tokenId, payload_hex: record.payloadHex }, '0', GAS);
+    setLastTx({ label: 'Bitcoin signing request sent on NEAR', hash: tx.transaction.hash });
+    try { await waitForSignature(record.tokenId, record.payloadHex, gift.request_id); }
+    finally { await refresh(selected.id); }
+    setReviewRecord(null);
+    setLastTx({ label: 'Bitcoin signature authorized on NEAR', hash: tx.transaction.hash });
+    setNotice('Your payout is ready. Send it to Bitcoin to finish.');
+  });
 
   const broadcastClaim = () => run('Broadcasting Bitcoin transaction', async () => {
     const raw = localStorage.getItem(claimStorageKey(selected.id));
     if (!raw) throw new Error('No prepared payout in this browser. Prepare a new digest with the same gift owner.');
-    const record = JSON.parse(raw);
+    const record = readPreparedClaim(raw, CONTRACT, selected, account);
+    if (!record) throw new Error('The prepared payout belongs to a different gift or holder.');
     const gift = await view('gift', { token_id: record.tokenId });
     if (gift.owner_id !== record.owner || gift.pending || gift.last_payload_hex !== record.payloadHex || !gift.last_signature)
       throw new Error('On-chain signature does not match the prepared Bitcoin payout');
@@ -251,54 +292,60 @@ function App() {
     setBalance(0);
   });
 
-  const storedClaim = selected && localStorage.getItem(claimStorageKey(selected.id));
+  const storedClaim = selected && readPreparedClaim(localStorage.getItem(claimStorageKey(selected.id)), CONTRACT, selected, account);
   const storedTxid = selected && localStorage.getItem(`${claimStorageKey(selected.id)}:txid`);
-  const canBroadcast = !!storedClaim && !storedTxid && !!selected?.last_signature && !selected?.pending;
+  const canBroadcast = !!storedClaim && !storedTxid && selected?.last_payload_hex === storedClaim.payloadHex && !!selected?.last_signature && !selected?.pending;
   const canAuthorize = isOwner && !selected?.pending;
+  const recipientUrl = selected && recipientLink(window.location.href, selected.id);
 
   const showingPayout = selected?.id === RECORDED_GIFT.id;
   const knownPayout = showingPayout && payout;
-  const selectedAmount = knownPayout ? payout.amount : balance;
-  const cardState = knownPayout ? (payout.confirmed ? 'Payout confirmed' : 'Payout observed · unconfirmed') : selected?.redemption_started ? 'Redemption started' : balance > 0 ? 'Funded · ready to pass on' : balance === 0 ? 'Awaiting Bitcoin' : 'Reading public testnets';
+
+
+  const [claimPayout, setClaimPayout] = useState(null);
+  const [claimPayoutError, setClaimPayoutError] = useState('');
+  useEffect(() => {
+    let active = true;
+    setClaimPayout(null); setClaimPayoutError('');
+    if (!route.claim || !address || !/^[0-9a-f]{64}$/.test(storedTxid ?? '') || showingPayout) return;
+    fetch(`${BTC_API}/tx/${storedTxid}`, { signal: AbortSignal.timeout(12000) })
+      .then(async (response) => { if (!response.ok) throw new Error('The payout is not visible in the public Bitcoin API yet. Check again shortly.'); return response.json(); })
+      .then((tx) => {
+        if (tx.txid !== storedTxid || tx.vin?.length !== 1 || tx.vin[0].prevout?.scriptpubkey_address !== address || tx.vout?.length !== 1 || tx.fee !== 250 || tx.vin[0].prevout.value - tx.vout[0].value !== tx.fee) throw new Error('The recorded transaction could not be matched to this gift.');
+        if (active) setClaimPayout({ amount: tx.vout[0].value, txid: tx.txid, confirmed: tx.status?.confirmed === true, block: tx.status?.block_height });
+      }).catch((error) => { if (active) setClaimPayoutError(error.message); });
+    return () => { active = false; };
+  }, [route.claim, address, storedTxid, showingPayout, refreshNonce]);
+
+  const chooseGift = (id) => { setSelectedId(id); setReviewRecord(null); history.replaceState(null, '', `?gift=${id}`); };
+
+  if (route.claim) return <ClaimPage gift={selected} giftId={route.id} account={account} walletName={walletInfo?.name} walletId={walletInfo?.id} loading={!readAt && !error} error={error} balance={balance} payout={knownPayout ? { ...payout, txid: RECORDED_GIFT.payout, recorded: true } : claimPayout} payoutError={showingPayout ? payoutError : claimPayoutError} destination={destination} setDestination={setDestination} connect={connect} disconnect={() => run('Disconnecting wallet', () => connector.disconnect())} refresh={() => run('Checking gift', () => refresh())} busy={busy} prepare={prepareClaim} review={reviewRecord} authorize={authorizeReviewed} canBroadcast={canBroadcast} broadcast={broadcastClaim} storedTxid={storedTxid} local={['localhost','127.0.0.1','[::1]'].includes(window.location.hostname)} notice={notice}/>;
 
   return <div className="app-shell" ref={appRef}>
     <header className="site-header">
       <a className="brand" href="#top" aria-label="PrizeKey home"><span className="brand-mark"><KeyRound size={22} strokeWidth={2.3} /></span><span>prizekey<span className="brand-dot">.</span></span></a>
-      <nav className={menuOpen ? 'nav-links open' : 'nav-links'}><a href="#how" onClick={() => setMenuOpen(false)}>How it works</a><a href="#create" onClick={() => { setMenuOpen(false); setCreateOpen(true); }}>Make a gift</a><a href="#proof" onClick={() => setMenuOpen(false)}>Proof</a></nav>
+      <nav className={menuOpen ? 'nav-links open' : 'nav-links'}><a href="#gifts" onClick={() => setMenuOpen(false)}>Gifts</a><a href="#create" onClick={() => { setMenuOpen(false); setCreateOpen(true); }}>Create gift</a><a href="#transactions" onClick={() => { setMenuOpen(false); setTransactionsOpen(true); }}>Transaction details</a></nav>
       <div className="header-actions"><span className="network-pill">TESTNET · NO VALUE</span><button className="wallet-button" onClick={account ? () => connector.disconnect() : connect} disabled={walletLoading || !!busy}><Wallet size={16} />{walletLoading ? 'Checking…' : account ? short(account, 11, 7) : 'Connect wallet'}</button><button className="mobile-menu" aria-label="Open menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={22} /> : <Menu size={22} />}</button></div>
     </header>
 
     <main id="top">
-      <section className="hero wrap" id="explore">
-        <div className="hero-copy"><div className="eyebrow">A BITCOIN PRIZE. A KEY TO PASS ON.</div><h1>Give Bitcoin.<br /><em>They choose<br />where it goes.</em></h1><p>Fund the prize now. Pass its NEAR claim to the winner. They redeem native Bitcoin.</p><div className="hero-cta"><button className="primary-button" data-testid="create-gift" onClick={() => { setCreateOpen(true); document.getElementById('create')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }}>Create a Bitcoin gift <ArrowRight size={18} /></button><button className="text-button" data-testid="redeemed-case" onClick={() => setSelectedId(RECORDED_GIFT.id)}>See a completed handoff <ArrowUpRight size={17} /></button></div><div className="hero-foot"><span className="source-dot"/> Live reads · Bitcoin + NEAR testnets · no monetary value</div></div>
-        <div className="gift-stage" aria-live="polite" aria-label="Selected gift and public chain state">
-          <div className="stage-glow" aria-hidden="true"/><span className="stage-spark" aria-hidden="true">✦</span>
-          <div className="gift-card" data-testid="gift-card">
-            <div className="card-top"><span className="card-wordmark"><KeyRound size={17}/> PRIZEKEY</span><span>#{selected ? String(selected.id).padStart(3,'0') : '—'}</span></div>
-            <div className="card-art" aria-hidden="true"><span className="card-orbit orbit-a"/><span className="card-orbit orbit-b"/><span className="bitcoin-coin"><Bitcoin size={66} strokeWidth={1.5}/></span></div>
-            <div className="card-value"><small>{knownPayout ? 'BITCOIN DELIVERED · RECORDED HANDOFF' : 'BITCOIN AT THIS GIFT'}</small><strong>{selectedAmount == null ? 'Reading…' : sats(selectedAmount)}<span>{selectedAmount == null ? '' : ' sats'}</span></strong><span className="card-state"><span/>{cardState}</span></div>
-            <div className="card-owner"><span><small>NEAR CLAIM HOLDER</small><strong>{selected ? selected.owner_id : 'Reading the contract…'}</strong></span><KeyRound size={22}/></div>
-          </div>
-          <div className="gift-caption"><span><ShieldCheck size={16}/>{knownPayout ? `Existing payout · ${payout.confirmed ? `confirmed at block ${sats(payout.block)}` : 'confirmation pending'}` : selected?.redemption_started ? 'Claim transfers frozen after signing begins' : 'Transfer the claim. Keep the Bitcoin native.'}</span><span>{showingPayout ? `Case #${RECORDED_GIFT.id} · ${RECORDED_GIFT.date}` : selected ? `Live gift #${selected.id}` : 'Loading'}</span></div>
-        </div>
-      </section>
-
-      <section className="journey wrap" id="how" aria-label="How PrizeKey works"><div><span className="journey-number">01</span><Gift size={23}/><span><strong>Fund a gift</strong><small>Bitcoin gets its own address</small></span></div><span className="journey-arrow">→</span><div><span className="journey-number">02</span><Send size={23}/><span><strong>Pass the claim</strong><small>Ownership moves on NEAR</small></span></div><span className="journey-arrow">→</span><div><span className="journey-number">03</span><Bitcoin size={23}/><span><strong>Winner redeems</strong><small>Native BTC, their destination</small></span></div></section>
-
-      <section className="gift-desk wrap" aria-labelledby="desk-title">
-        <div className="section-head"><div><span className="section-kicker">YOUR GIFT DESK</span><h2 id="desk-title">One claim. <em>One current holder.</em></h2></div><button className="quiet-button" onClick={() => run('Refreshing gifts', () => refresh())} disabled={!!busy}>Refresh live data <ArrowUpRight size={15}/></button></div>
-        <div className="source-note">{readAt ? `NEAR state read ${readAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Bitcoin balance is a separate live UTXO read.` : 'Reading public NEAR testnet state…'} {showingPayout && 'The card shows an existing payout, not a new transaction.'}</div>
-        <div className="gift-list" aria-label="Choose a gift">{gifts.map((gift) => <button type="button" data-gift-id={gift.id} aria-pressed={selectedId === gift.id} className={selectedId === gift.id ? 'gift-list-item selected' : 'gift-list-item'} key={gift.id} onClick={() => setSelectedId(gift.id)}><span className="gift-list-icon"><Gift size={19}/></span><span><strong>{gift.title}</strong><small>#{String(gift.id).padStart(3, '0')} · {gift.redemption_started ? 'Redemption started' : 'Transferable'}</small></span><ArrowUpRight size={17}/></button>)}</div>
-        {selected && <div className="gift-details"><div className="gift-live-summary" aria-live="polite"><div><small>CURRENT GIFT BALANCE</small><strong>{balance == null ? 'Reading…' : `${sats(balance)} sats`}</strong></div><div><small>CURRENT CLAIM HOLDER</small><strong>{selected.owner_id}</strong></div></div><div className="detail-title"><span className="tiny-label">GIFT #{selected.id}</span><h3>{selected.title}</h3><p>{selected.message}</p></div><div className="address-box"><span>THIS GIFT’S BITCOIN ADDRESS</span><code>{address || 'Deriving address…'}</code><div>{address && <><CopyButton value={address} label="Copy"/><a href={`https://mempool.space/testnet4/address/${address}`} target="_blank" rel="noreferrer">Inspect Bitcoin balance <ExternalLink size={14}/></a></>}</div></div></div>}
+      <section className="gift-desk wrap" id="gifts" aria-labelledby="desk-title">
+        <div className="section-head"><div><h1 id="desk-title">Bitcoin gifts</h1><p className="desk-description">Create a gift, fund its address, and assign it to a NEAR account.</p><span className="desk-network">NEAR testnet · Bitcoin testnet4 · No monetary value</span></div><div className="desk-actions"><button className="primary-button" data-testid="create-gift" onClick={() => { setCreateOpen(true); document.getElementById('create')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }}>Create gift <Gift size={17}/></button><button className="quiet-button" onClick={() => run('Refreshing gifts', () => refresh())} disabled={!!busy}>Refresh <ArrowUpRight size={15}/></button></div></div>
+        <div className="source-note">{readAt ? `NEAR state read ${readAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Bitcoin balance is a separate live UTXO read.` : 'Reading public NEAR testnet state…'} {showingPayout && 'Recorded payout is available in Transaction details.'}</div>
+        <label className="mobile-gift-picker" htmlFor="gift-selector">Gift<select id="gift-selector" data-testid="gift-picker" value={selected ? selectedId : ''} onChange={(e) => { if (e.target.value !== '') chooseGift(Number(e.target.value)); }} disabled={!gifts.length}><option value="">{gifts.length ? 'Choose a gift' : 'Loading gifts…'}</option>{gifts.map((gift) => <option key={gift.id} value={gift.id}>#{gift.id} · {gift.title}</option>)}</select></label>
+        <div className="gift-list" aria-label="Choose a gift">{gifts.map((gift) => <button type="button" data-gift-id={gift.id} aria-pressed={selectedId === gift.id} className={selectedId === gift.id ? 'gift-list-item selected' : 'gift-list-item'} key={gift.id} onClick={() => chooseGift(gift.id)}><span className="gift-list-icon"><Gift size={19}/></span><span><strong>{gift.title}</strong><small>#{String(gift.id).padStart(3, '0')} · {gift.redemption_started ? 'Redemption started' : 'Transferable'}</small></span><ArrowUpRight size={17}/></button>)}</div>
+        {selected && <div className="gift-details"><div className="gift-live-summary" key={selected.owner_id} aria-live="polite"><div><small>CURRENT GIFT BALANCE</small><strong>{balance == null ? 'Reading…' : `${sats(balance)} sats`}</strong></div><div><small>CURRENT CLAIM HOLDER</small><strong>{selected.owner_id}</strong></div></div><div className="detail-title"><span className="tiny-label">GIFT #{selected.id}</span><h3>{selected.title}</h3><p>{selected.message}</p></div><div className="address-box"><span>THIS GIFT’S BITCOIN ADDRESS</span><code>{address || 'Deriving address…'}</code><div>{address && <><CopyButton value={address} label="Copy"/><a href={`https://mempool.space/testnet4/address/${address}`} target="_blank" rel="noreferrer">Inspect Bitcoin balance <ExternalLink size={14}/></a></>}</div></div></div>}
+        {selected && <section className="recipient-share"><div><strong>{recipientUrl.local ? 'Recipient preview' : 'Recipient link'}</strong><p>The gift is assigned to <b>{selected.owner_id}</b>. {isOwner && !selected.redemption_started ? 'Transfer it to the recipient’s NEAR account before they can redeem.' : 'Only that account can redeem; this link does not transfer ownership.'}</p>{recipientUrl.local && <small>Local preview only. Publish this app before sharing it with someone on another device.</small>}</div><div><a className="secondary-button" href={recipientUrl.href}>Open recipient page <ArrowUpRight size={16}/></a><CopyButton value={recipientUrl.href} label={recipientUrl.local ? 'Copy local preview' : 'Copy recipient link'}/></div></section>}
+        {!selected && readAt && <p className="empty-state">This gift wasn’t found. Check the ID in your link.</p>}
         {gifts.length === 0 && <div className="empty-state">{error ? 'Public testnet reads are unavailable. No gift state has been inferred.' : 'Reading gifts from NEAR testnet…'}</div>}
-        {selected && <details className="manage-details" id="manage"><summary><span><KeyRound size={18}/> Transfer or redeem this gift</span><small>{isOwner ? 'You are the current holder' : 'Connect the current holder’s wallet to act'} <ArrowDownRight size={16}/></small></summary><div className="action-grid"><form className="action-card" onSubmit={transferGift}><h3>Pass the claim</h3><p>The next NEAR holder gets permission to request the Bitcoin signature.</p><label>Recipient NEAR account<input value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="winner.testnet" required disabled={!isOwner || selected.redemption_started}/></label><button className="primary-button" type="submit" disabled={!isOwner || selected.redemption_started || !!busy}>Transfer claim <ArrowRight size={16}/></button><small className="action-warning">Prototype: an admin upgrade key remains.</small></form><form className="action-card" onSubmit={prepareClaim}><h3>Redeem native Bitcoin</h3><p>Signing freezes transfers. A replacement signature does not invalidate a previously signed payout.</p><label>Your Bitcoin testnet4 address<input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="tb1q…" disabled={!canAuthorize}/></label><button className="primary-button" type="submit" disabled={!canAuthorize || !!busy || !balance}>{selected.last_signature ? 'Replace authorization' : selected.redemption_started ? 'Retry authorization' : 'Authorize payout'} <ArrowRight size={16}/></button>{canBroadcast && <button className="secondary-button" type="button" onClick={broadcastClaim} disabled={!!busy}>Broadcast prepared Bitcoin payout <ExternalLink size={16}/></button>}{storedTxid && <a className="proof-link" href={btcTx(storedTxid)} target="_blank" rel="noreferrer">Your Bitcoin transaction <ExternalLink size={14}/></a>}<small className="action-warning">Destination and fee policy are not fully enforced on chain. Test assets only.</small></form></div></details>}
+        {selected && <details className="manage-details" id="manage"><summary><span><KeyRound size={18}/> Transfer or redeem this gift</span><small>{isOwner ? 'You are the current holder' : 'Connect the current holder’s wallet to act'} <ArrowDownRight size={16}/></small></summary><div className="action-grid"><form className="action-card" onSubmit={transferGift}><h3>Pass the claim</h3><p>The next NEAR holder gets permission to request the Bitcoin signature.</p><label>Recipient NEAR account<input value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="winner.testnet" required disabled={!isOwner || selected.redemption_started}/></label><button className="primary-button" type="submit" disabled={!isOwner || selected.redemption_started || !!busy}>Transfer claim <ArrowRight size={16}/></button><small className="action-warning">Prototype: an admin upgrade key remains.</small></form><form className="action-card" onSubmit={prepareClaim}><h3>Redeem native Bitcoin</h3><p>Signing freezes transfers. A replacement signature does not invalidate a previously signed payout.</p><label>Your Bitcoin testnet4 address<input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="tb1q…" disabled={!canAuthorize}/></label><button className="primary-button" type="submit" disabled={!canAuthorize || !!busy || !balance}>Review my payout <ArrowRight size={16}/></button>{reviewRecord && <div className="recipient-review"><h3>Review your payout</h3><code>{reviewRecord.destination}</code><strong>{sats(reviewRecord.amount)} test sats · {sats(reviewRecord.fee)}-sat fee</strong><button className="primary-button" type="button" onClick={authorizeReviewed} disabled={!!busy}>Approve in my wallet <ArrowRight size={16}/></button></div>}{canBroadcast && <button className="secondary-button" type="button" onClick={broadcastClaim} disabled={!!busy}>Broadcast prepared Bitcoin payout <ExternalLink size={16}/></button>}{storedTxid && <a className="proof-link" href={btcTx(storedTxid)} target="_blank" rel="noreferrer">Your Bitcoin transaction <ExternalLink size={14}/></a>}<small className="action-warning">Destination and fee policy are not fully enforced on chain. Test assets only.</small></form></div></details>}
       </section>
 
-      <section className="proof-section wrap" id="proof"><div className="section-head"><div><span className="section-kicker">THE HANDOFF, ON THE RECORD</span><h2>From gift to <em>their Bitcoin.</em></h2></div><span className="proof-date">Recorded case #{RECORDED_GIFT.id} · {RECORDED_GIFT.date}</span></div><div className="proof-journey"><a href={nearTx(RECORDED_GIFT.mint)} target="_blank" rel="noreferrer"><span className="proof-step">01</span><Gift size={24}/><strong>Gift created</strong><small>NEAR claim #{RECORDED_GIFT.id} <ExternalLink size={12}/></small></a><a href={nearTx(RECORDED_GIFT.transfer)} target="_blank" rel="noreferrer"><span className="proof-step">02</span><Send size={24}/><strong>Claim passed on</strong><small>New NEAR holder <ExternalLink size={12}/></small></a><a href={nearTx(RECORDED_GIFT.sign)} target="_blank" rel="noreferrer"><span className="proof-step">03</span><KeyRound size={24}/><strong>Holder authorized</strong><small>NEAR Chain Signatures <ExternalLink size={12}/></small></a><a className="proof-payout" data-testid="payout-proof" href={btcTx(RECORDED_GIFT.payout)} target="_blank" rel="noreferrer"><span className="proof-step">04</span><Bitcoin size={24}/><strong>{payout ? `${sats(payout.amount)} sats sent` : 'Inspect Bitcoin payout'}</strong><small>{payout ? payout.confirmed ? 'Confirmed on Bitcoin testnet4' : 'Observed · not confirmed' : payoutError ? 'Live recheck unavailable' : 'Reading public transaction…'} <ExternalLink size={12}/></small></a></div><p className="proof-note">These are historical transactions, not actions performed on this page. The winner authorized through the browser’s NEAR CLI option; signing required a terminal. The browser prepared and broadcast the Bitcoin payout.</p></section>
+      <section className="transaction-section wrap" id="transactions"><span id="proof"/><details className="transaction-details" open={transactionsOpen} onToggle={(e) => setTransactionsOpen(e.currentTarget.open)}><summary>Transaction details {selected ? `· Gift #${selected.id}` : ''}</summary><div className="transaction-body">{selected ? <><p>Current holder: <strong>{selected.owner_id}</strong>. {selected.pending ? 'Approval is processing.' : selected.redemption_started ? 'Claim transfers are frozen because signing began.' : 'The claim can be transferred by its holder.'}</p>{showingPayout ? <><h3>Recorded activity · {RECORDED_GIFT.date}</h3><dl><div><dt>Claim created</dt><dd><a href={nearTx(RECORDED_GIFT.mint)} target="_blank" rel="noreferrer">NEAR transaction <ExternalLink size={13}/></a></dd></div><div><dt>Claim transferred</dt><dd><a href={nearTx(RECORDED_GIFT.transfer)} target="_blank" rel="noreferrer">NEAR transaction <ExternalLink size={13}/></a></dd></div><div><dt>Holder approved payout</dt><dd><a href={nearTx(RECORDED_GIFT.sign)} target="_blank" rel="noreferrer">NEAR transaction <ExternalLink size={13}/></a></dd></div><div><dt>Bitcoin payout</dt><dd><a data-testid="payout-proof" href={btcTx(RECORDED_GIFT.payout)} target="_blank" rel="noreferrer">{payout ? `${sats(payout.amount)} test sats · ${payout.confirmed ? `confirmed in block ${sats(payout.block)}` : 'unconfirmed'}` : payoutError ? 'Public recheck unavailable; inspect transaction' : 'Checking public Bitcoin transaction…'} <ExternalLink size={13}/></a></dd></div></dl><p>These are recorded transactions. Opening this page makes no new payment. The recorded NEAR wallet used terminal signing; the browser prepared and broadcast the Bitcoin payout.</p><a className="secondary-button" href={recipientUrl.href}>Open recipient page <ArrowUpRight size={15}/></a></> : storedTxid ? <a href={btcTx(storedTxid)} target="_blank" rel="noreferrer">Inspect the transaction recorded in this browser <ExternalLink size={13}/></a> : <p>No Bitcoin payout is recorded here. An approval or an empty balance alone does not establish delivery.</p>}</> : <p>Select a gift to inspect its transaction status.</p>}<p><a href="https://github.com/bebe0307mz/prizekey/blob/main/evidence/README.md" target="_blank" rel="noreferrer">Evidence and older examples <ExternalLink size={13}/></a></p></div></details></section>
 
-      <section className="create-section wrap" id="create"><details className="create-details" open={createOpen} onToggle={(e) => setCreateOpen(e.currentTarget.open)}><summary><span><Gift size={22}/><strong>Make your own gift</strong></span><span>0.01 testnet NEAR storage <ArrowDownRight size={18}/></span></summary><form className="form-card" onSubmit={createGift}><label>Gift title<input maxLength="80" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A little Bitcoin" required /></label><label>A note for the winner<textarea maxLength="240" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Say something memorable…" rows="2" /></label><button className="primary-button" disabled={!!busy || !account} type="submit">{busy === 'Creating gift' ? 'Creating…' : account ? 'Create gift' : 'Connect a wallet to create'} <ArrowRight size={18}/></button><p className="action-warning">Create the NEAR claim, fund its Bitcoin testnet4 address, then pass it on. All assets have no value.</p></form></details><details className="limits"><summary>Prototype limits & trust</summary><p>NEAR testnet and Bitcoin testnet4 only. The contract checks the current holder before requesting a Chain Signatures MPC signature; it still has an admin upgrade key. The deployed contract does not bind every Bitcoin destination or fee detail. Direct transfer works; full NEP-171 interoperability is incomplete. Redemption supports one UTXO per gift. Beginning redemption freezes claim transfers, and an earlier signed payout may still broadcast after reauthorization.</p></details></section>
+      <section className="create-section wrap" id="create"><details className="create-details" open={createOpen} onToggle={(e) => setCreateOpen(e.currentTarget.open)}><summary><span><Gift size={22}/><strong>Create a gift</strong></span><span>0.01 testnet NEAR storage <ArrowDownRight size={18}/></span></summary><form className="form-card" onSubmit={createGift}><label>Gift title<input maxLength="80" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A little Bitcoin" required /></label><label>A note for the winner<textarea maxLength="240" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Say something memorable…" rows="2" /></label><button className="primary-button" disabled={!!busy || !account} type="submit">{busy === 'Creating gift' ? 'Creating…' : account ? 'Create gift' : 'Connect a wallet to create'} <ArrowRight size={18}/></button><p className="action-warning">Create the NEAR claim, fund its Bitcoin testnet4 address, then pass it on. All assets have no value.</p></form></details><details className="limits"><summary>Prototype limits & trust</summary><p>NEAR testnet and Bitcoin testnet4 only. The contract checks the current holder before requesting a Chain Signatures MPC signature; it still has an admin upgrade key. The deployed contract does not bind every Bitcoin destination or fee detail. Direct transfer works; full NEP-171 interoperability is incomplete. Redemption supports one UTXO per gift. Beginning redemption freezes claim transfers, and an earlier signed payout may still broadcast after reauthorization.</p></details></section>
     </main>
-    <footer className="site-footer wrap"><a className="brand" href="#top"><KeyRound size={20}/><span>prizekey.</span></a><span>Built at NEAR Hackathon 2026 · Test assets only</span><a href="https://github.com/bebe0307mz/prizekey" target="_blank" rel="noreferrer">Source <ArrowUpRight size={15}/></a></footer>
+    <footer className="site-footer wrap"><a className="brand" href="#top"><KeyRound size={20}/><span>prizekey.</span></a><span>Testnet prototype · No monetary value</span><a href="https://github.com/bebe0307mz/prizekey" target="_blank" rel="noreferrer">Source <ArrowUpRight size={15}/></a></footer>
     {(notice || error || lastTx) && <div className={error ? 'toast error' : 'toast'} role="status"><button aria-label="Dismiss" onClick={() => { setNotice(''); setError(''); setLastTx(null); }}><X size={16}/></button><strong>{error ? 'Something needs attention' : busy || 'On-chain update'}</strong><p>{error || notice}</p>{lastTx && <a href={lastTx.bitcoin ? btcTx(lastTx.hash) : nearTx(lastTx.hash)} target="_blank" rel="noreferrer">{lastTx.label} <ExternalLink size={14}/></a>}</div>}
   </div>;
 }
