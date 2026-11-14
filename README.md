@@ -66,9 +66,9 @@ This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` 
 
 ## Hackathon demo
 
-Watch the [84-second portrait walkthrough](public/demo.mp4) or the [1080p landscape copy](public/demo-1080p.mp4). The current phone app shows the recipient’s unsigned review, then labeled earlier Gift #3 transfer/redemption footage and the current confirmed payout. [DEMO.md](DEMO.md) records the exact scope and capture-quality limitation; [DEMO-SCRIPT.md](DEMO-SCRIPT.md) contains the matching narration. No new transaction was performed for this edit.
+Watch the [60-second portrait walkthrough](public/demo.mp4) or the [1080p landscape copy](public/demo-1080p.mp4). One actual Gift #3 carries the story: funded Bitcoin, a claim transferred to the winner, their chosen Bitcoin destination, and confirmed delivery. Original signing footage is labeled as recorded; the current recipient page and transaction details close the journey. [DEMO.md](DEMO.md) documents the exact evidence and capture limit; [DEMO-SCRIPT.md](DEMO-SCRIPT.md) contains the matching narration. No new transaction was performed for this edit.
 
-The published [GitHub Pages demo](https://bebe0307mz.github.io/prizekey/) reflects the last published revision; local final production changes require a separately authorized push and Pages build. Use the local setup above to inspect this revision.
+The [public app](https://bebe0307mz.github.io/prizekey/), [recipient record](https://bebe0307mz.github.io/prizekey/?claim=3), and [demo video](https://bebe0307mz.github.io/prizekey/demo.mp4) are hosted through the repository’s GitHub Pages workflow. Use the local setup above to reproduce this revision.
 
 ## Contributors, dependencies and provenance
 
