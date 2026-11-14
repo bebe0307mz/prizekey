@@ -1,31 +1,34 @@
-# PrizeKey — current presentation script
+# PrizeKey — 84-second product walkthrough
 
-The product and presentation are separate. Current app tasks: create/manage gifts, transfer a claim, review a payout, and inspect transaction status. Historical signing footage is labeled as recorded prior-interface execution. No new transaction is performed for the refreshed presentation.
+Zoe QUICK uses her existing authorized voice model. The current phone review is read-only. Historical Gift #3 transactions use their genuine original desktop footage and are labeled **Recorded Gift #3 · prior interface**. No new signing or Bitcoin broadcast was performed for this edit.
 
-## Narration — Zoe QUICK
+## Spoken narration
 
-I'm Zoe. Prize organizers may need to fund Bitcoin before they know the winner, or the winner's Bitcoin address.
+I want to set aside a Bitcoin prize before I know the winner's Bitcoin address. That's why I built PrizeKey.
 
-PrizeKey lets you fund Bitcoin now, and choose the recipient later.
+Here is a funded gift. I check its balance and assigned account, then open the recipient page.
 
-Create a gift, fund its Bitcoin address, and assign it to the winner’s NEAR account.
+Using the existing assigned account, I paste a Bitcoin test address and review the payout. That's ninety-nine thousand seven hundred fifty test sats, with a two hundred fifty sat fee. I stop before approval.
 
-The gift is funded with twenty thousand test sats. I enter the winner's NEAR account and transfer the claim.
+To show a completed handoff, this is the earlier twenty-thousand-sat gift. I enter the winner's NEAR account and transfer the claim.
 
-Ownership has changed. The new holder chooses a Bitcoin destination and authorizes the payout through NEAR Chain Signatures.
+The new holder chooses a Bitcoin destination and authorizes through NEAR Chain Signatures. The browser broadcasts Bitcoin. This recorded run used terminal wallet approval.
 
-The browser broadcasts the signed Bitcoin transaction. No wrapped token, and no private key passed to the winner.
+Back in the current phone app, that gift shows nineteen thousand seven hundred fifty test sats delivered, and the assigned recipient.
 
-The public Bitcoin record confirms nineteen thousand seven hundred fifty test sats delivered, with a two hundred fifty sat fee.
+I open its public record to check the payout. Fund Bitcoin first, choose the recipient later. This is still a testnet prototype.
 
-The recipient opens one gift page, without the organizer desk. Here is the recorded payout. This is still a testnet prototype.
+## Exact edit map
 
-## Edit requirements
+| Seconds | Actual workflow |
+| --- | --- |
+| 0–21.32 | Current phone gift manager: funded Gift #1, assigned account, real scrolling, tap Open recipient page, genuine public-read loading. |
+| 21.32–38.68 | Current recipient: paste a Bitcoin test address, prepare an unsigned payout, inspect 99,750 test sats and a 250-sat fee; stop before approval. |
+| 38.68–50.68 | Earlier approved Gift #3 desktop recording: 20,000 test sats, winner account entry, transfer approval, changed holder at the same gift address. |
+| 50.68–63.08 | Earlier recorded holder authorization and browser Bitcoin broadcast. The terminal-wallet approval requirement remains explicit. |
+| 63.08–71.58 | Current phone recipient for completed Gift #3: 19,750 test sats, block 161287, assigned recipient, completed-record notice, public-record tap. |
+| 71.58–84 | Current loaded transaction details: actual confirmed-status tap, short scrolls through NEAR transactions and confirmed Bitcoin payout. |
 
-- Open with the short problem/solution framing, then the actual current gift manager’s Create gift action and form. Narration is an instruction; do not show or imply a new creation succeeded.
-- Use the approved recorded Gift #3 execution for funding, transfer, new-holder balance, authorization and broadcast. Identify it as recorded prior-interface execution. Do not repeat any transaction.
-- Enlarge the actual 20,000-sat original-holder and new-holder cards at the same gift address. Use the public Bitcoin receipt showing the actual 19,750-sat payout and 250-sat fee.
-- End on the current dedicated recipient page showing the same recorded confirmed payout and assigned holder. Keep testnet/local-preview labels and completed-record attribution visible.
-- Retain ordinary synchronized subtitles, brief cuts, restrained motion and no redundant provenance footer. Do not present a browser-wallet redemption as terminal-free without an observed full test.
+Captions follow the spoken narration. Current mobile segments preserve real scrolling, taps, address input, loading and unsigned preparation. Genuine inactive historical/network waits are trimmed. Fixed crops preserve the recorded interface; no screenshot pan or fabricated intermediate app state is used. The opening and selected results have brief reading holds.
 
-The existing `public/demo.mp4` remains the historical transaction walkthrough until replacement captures and the new export are verified. Do not treat that earlier file as acceptance evidence for the new application layout.
+Capture limitation: current phone frames average about six per second; the 30 fps video repeats these frames. Some native scrolls therefore step abruptly. The current cut is reviewable, but it is not a 30 fps screen recording or verified smooth-touch footage.

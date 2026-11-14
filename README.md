@@ -26,7 +26,7 @@ The installed connector currently offers ordinary testnet wallet choices alongsi
 
 **Gift #3 is the complete recorded product run:** create a NEAR claim, fund its Bitcoin address with 20,000 testnet4 sats, transfer the claim to a second account, authorize as that holder, and broadcast 19,750 native testnet4 sats to the chosen destination. The payout was confirmed in block **161287** when checked on 14 November 2026. Confirmation is a dated observation; testnet reorganizations can change it.
 
-[Watch the recorded transaction demo](public/demo.mp4) · [Read the recorded flow](DEMO.md) · [Inspect every transaction](evidence/README.md) · [Saved verification result](evidence/gift3-verification.json).
+[Watch the current product walkthrough](public/demo.mp4) · [Read the recorded flow](DEMO.md) · [Inspect every transaction](evidence/README.md) · [Saved verification result](evidence/gift3-verification.json).
 
 ```sh
 pnpm verify:gift3
@@ -66,7 +66,7 @@ This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` 
 
 ## Hackathon demo
 
-Watch the [recorded narrated transaction demo](public/demo.mp4), or follow [DEMO.md](DEMO.md). It preserves the actual Gift #3 execution using the previous app layout, trims genuine network/wallet waits, and ends on independently checked Bitcoin confirmation. The current product uses a task-based manager and dedicated recipient page; refreshed presentation captures must match that layout. [The current production script](DEMO-SCRIPT.md) describes this separation. It performs no new transaction during playback.
+Watch the [84-second portrait walkthrough](public/demo.mp4) or the [1080p landscape copy](public/demo-1080p.mp4). The current phone app shows the recipient’s unsigned review, then labeled earlier Gift #3 transfer/redemption footage and the current confirmed payout. [DEMO.md](DEMO.md) records the exact scope and capture-quality limitation; [DEMO-SCRIPT.md](DEMO-SCRIPT.md) contains the matching narration. No new transaction was performed for this edit.
 
 The published [GitHub Pages demo](https://bebe0307mz.github.io/prizekey/) reflects the last published revision; local final production changes require a separately authorized push and Pages build. Use the local setup above to inspect this revision.
 

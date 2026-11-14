@@ -1,54 +1,33 @@
-# PrizeKey — recorded transaction walkthrough
+# PrizeKey — product walkthrough
 
-[Watch the recorded 63-second transaction demo](public/demo.mp4). 1920×1080, H.264/AAC, 30 fps. Zoe QUICK narration uses her existing authorized model. [Subtitles](public/demo.srt) are ordinary spoken captions and are also burned into the video.
+[Watch the 84-second portrait walkthrough](public/demo.mp4) · [1920×1080 landscape copy](public/demo-1080p.mp4) · [Spoken subtitles](public/demo.srt) · [Narration and edit map](DEMO-SCRIPT.md).
 
-This recording uses the earlier app layout. The current working product opens on a gift manager with an independent recipient page. Its refreshed presentation is specified in [DEMO-SCRIPT.md](DEMO-SCRIPT.md); this historical clip is evidence of the executed transactions, not a claim that new signing steps were tested.
+The updated cut follows the actual current responsive app: funded gift → recipient page → address entry → unsigned amount/fee review → earlier recorded claim transfer/redemption → current confirmed payout details. Actual app use dominates; historical signing is explicitly labeled as recorded prior-interface execution. Zoe QUICK narration uses her existing authorized model. Both copies are H.264/AAC with ordinary burned-in captions and matching SRT/VTT files.
 
-## What the recording proves
+## What was actually performed
 
-The real Gift #3 workflow ran on 14 November 2026: create → fund 20,000 test sats → transfer the NEAR claim → current holder authorizes → browser broadcasts 19,750 native test sats. The public payout was confirmed in Bitcoin testnet4 block 161287 at verification. Both assets are valueless test assets. Genuine wallet/network waits are trimmed, and selected actual result frames are held for readability. No new transaction runs during playback. A fresh public explorer read closes the story; confirmation status can change after a testnet reorganization.
+The current phone preview uses the separate Gift #1, which still holds 100,000 test sats. It prepares an unsigned 99,750-sat payout with a 250-sat fee for review. **Approve in my wallet was never clicked.** Gift #1 remains untouched.
 
-The NEAR steps used the browser wallet’s CLI option and required terminal signing. The Bitcoin funding transaction was prepared separately; the browser showed its resulting funded UTXO. The browser prepared and broadcast the holder’s Bitcoin payout. This prototype retains an admin upgrade key and the policy/interoperability limits described in the README. No live old-owner rejection transaction was sent for Gift #3.
+The completed example is Gift #3. Its real workflow ran on 14 November 2026: create → fund 20,000 test sats → transfer the NEAR claim → new holder authorizes → browser broadcasts 19,750 native test sats. The public payout was independently confirmed in Bitcoin testnet4 block 161287. Both networks use valueless test assets. Opening the completed gift or playing the video makes no payment. Confirmation status can change after a testnet reorganization.
+
+The recorded NEAR wallet used its CLI option and required terminal signing. Bitcoin funding was prepared separately; the browser displayed the resulting funded UTXO, then prepared and broadcast the holder’s payout. No fresh browser-wallet signing, old-owner rejection transaction, or mainnet flow is claimed. The prototype retains an admin upgrade key and destination/fee-policy and interoperability limits described in the README.
+
+## Capture quality and provenance
+
+Mobile source takes use the actual responsive application at 393×780, with genuine supported browser scrolling, clicks, field input and public-read loading. Continuous screenshot streams retain source timestamps and intermediate frames where captured. Fixed crops remove unused capture surface; no animated pan of a screenshot, synthetic gesture, or fabricated success state is used. Genuine inactive waits are trimmed, and actual result views receive short reading holds.
+
+The available browser capture averages about **6 source frames per second**, despite the 30 fps encoded container. Some native scrolls step abruptly; encoding does not restore missing movement. A faster capture trial also observed immediate native-scroll steps. This is a reviewable current-product cut, not a claimed smooth 30/60 fps touchscreen recording. Portrait is intended for the recipient flow; the landscape copy gives the original desktop transaction evidence more readable space.
 
 ## Shot-by-shot edit map
 
-Simple cuts and short dissolves connect the shots. Actual screens appear inside a consistent frame; focused crops enlarge complete balance/holder cards and the Bitcoin receipt, while captions sit below them. Screens are actual captures, never reconstructed success states. The first twelve seconds introduce the problem and solution; the remainder shows product execution and its public result.
-
-| Seconds | Purpose | Actual visual |
-| --- | --- | --- |
-| 00.00–08.00 | THE PROBLEM | Original problem slide; prize funding precedes winner/address. |
-| 08.00–12.50 | THE IDEA | Three-step solution slide. |
-| 12.50–16.00 | 01 / CREATE | Create from the recorded Gift #3 workflow. |
-| 16.00–17.40 | 01 / CREATE | Created from the recorded Gift #3 workflow. |
-| 17.40–20.60 | 02 / FUND | Fund Address from the recorded Gift #3 workflow. |
-| 20.60–23.30 | 02 / FUND | Enlarged actual card: 20,000 sats, original holder and Gift #3 address. |
-| 23.30–27.45 | 03 / TRANSFER | Transfer from the recorded Gift #3 workflow. |
-| 27.45–30.40 | 03 / TRANSFER | Enlarged actual card: 20,000 sats, new CURRENT CLAIM HOLDER, same Gift #3 address before redemption. |
-| 30.40–34.40 | 04 / AUTHORIZE | Authorize from the recorded Gift #3 workflow. |
-| 34.40–36.50 | 04 / AUTHORIZE | Signature Ready from the recorded Gift #3 workflow. |
-| 36.50–41.30 | 05 / BROADCAST | Broadcast from the recorded Gift #3 workflow. |
-| 41.30–43.80 | 05 / BROADCAST | Broadcast from the recorded Gift #3 workflow. |
-| 43.80–52.80 | 06 / VERIFIED RESULT | Actual mempool.space payout page: confirmation, 250-sat fee, native input/output. |
-| 52.80–57.10 | THE COMPLETE HANDOFF | Actual current app proof links and holder/balance. |
-| 57.10–63.00 | PRIZEKEY | Original value statement. |
-
-## Recorded narration
-
-I'm Zoe. Prize organizers may need to fund Bitcoin before they know the winner, or the winner's Bitcoin address.
-
-PrizeKey lets you fund Bitcoin now, and choose the recipient later.
-
-In this recorded testnet run, I create a gift. It gets its own Bitcoin address and a transferable claim on NEAR.
-
-The gift is funded with twenty thousand test sats. I enter the winner's NEAR account and transfer the claim.
-
-Ownership has changed. The new holder chooses a Bitcoin destination and authorizes the payout through NEAR Chain Signatures.
-
-The browser broadcasts the signed Bitcoin transaction. No wrapped token, and no private key passed to the winner.
-
-The public Bitcoin record confirms nineteen thousand seven hundred fifty test sats delivered, with a two hundred fifty sat fee.
-
-This is a testnet prototype with an admin upgrade key. Fund first, pass the claim, and let the holder choose where Bitcoin goes.
+| Seconds | Actual workflow |
+| --- | --- |
+| 0–21.32 | Current phone gift manager: funded Gift #1, assigned account, real scrolling, tap Open recipient page, genuine public-read loading. |
+| 21.32–38.68 | Current recipient: paste a Bitcoin test address, prepare an unsigned payout, inspect 99,750 test sats and a 250-sat fee; stop before approval. |
+| 38.68–50.68 | Earlier approved Gift #3 desktop recording: 20,000 test sats, winner account entry, transfer approval, changed holder at the same gift address. |
+| 50.68–63.08 | Earlier recorded holder authorization and browser Bitcoin broadcast. The terminal-wallet approval requirement remains explicit. |
+| 63.08–71.58 | Current phone recipient for completed Gift #3: 19,750 test sats, block 161287, assigned recipient, completed-record notice, public-record tap. |
+| 71.58–84 | Current loaded transaction details: actual confirmed-status tap, short scrolls through NEAR transactions and confirmed Bitcoin payout. |
 
 ## Read-only reproduction
 
@@ -62,6 +41,6 @@ pnpm verify:public
 pnpm exec vite --host 127.0.0.1 --port 4175 --strictPort
 ```
 
-Open `http://127.0.0.1:4175/?gift=3#desk-title` to inspect the current recipient and zero remaining gift balance, then Transaction details. Open `http://127.0.0.1:4175/?claim=3` for its dedicated recipient/status page. Open `?gift=1#top` to inspect the separate, still-funded 100,000-sat transferable claim. These views do not create, transfer, authorize or broadcast. To repeat transactions, obtain a new explicitly bounded authorization; the completed Gift #3 run must not be repeated.
+Open `http://127.0.0.1:4175/?gift=3#top` for the completed gift and transaction details, or `?claim=3` for its recipient page. Open `?gift=1#top` to inspect the separate still-funded gift. Read-only inspection creates, transfers, authorizes and broadcasts nothing. Obtain a new explicitly bounded authorization before any new signed operation; never repeat the completed Gift #3 run.
 
-Public verification inputs and dated outputs are under [evidence](evidence/README.md). Final local changes and video require a separately approved push before they appear on GitHub Pages. No X post or submission is created by this repository.
+Public verification inputs and dated outputs are under [evidence](evidence/README.md). Local final changes require a separately authorized push before they appear on GitHub Pages. No X post or submission is created by this repository.
