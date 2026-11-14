@@ -1,0 +1,107 @@
+1
+00:00:00,450 --> 00:00:01,250
+I'm Zoe.
+
+2
+00:00:01,250 --> 00:00:03,790
+Prize organizers may need to fund Bitcoin
+
+3
+00:00:03,790 --> 00:00:05,430
+before they know the winner,
+
+4
+00:00:05,450 --> 00:00:07,550
+or the winner’s Bitcoin address.
+
+5
+00:00:08,000 --> 00:00:09,860
+PrizeKey lets you fund Bitcoin now,
+
+6
+00:00:09,860 --> 00:00:12,080
+and choose the recipient later.
+
+7
+00:00:12,500 --> 00:00:14,450
+In this recorded testnet run,
+
+8
+00:00:14,500 --> 00:00:15,820
+I create a gift.
+
+9
+00:00:15,900 --> 00:00:17,900
+It gets its own Bitcoin address
+
+10
+00:00:17,900 --> 00:00:20,150
+and a transferable claim on NEAR.
+
+11
+00:00:20,600 --> 00:00:23,350
+The gift is funded with 20,000 test sats.
+
+12
+00:00:23,480 --> 00:00:25,450
+I enter the winner’s NEAR account
+
+13
+00:00:25,450 --> 00:00:26,970
+and transfer the claim.
+
+14
+00:00:27,450 --> 00:00:29,000
+Ownership has changed.
+
+15
+00:00:29,130 --> 00:00:31,950
+The new holder chooses a Bitcoin destination
+
+16
+00:00:32,050 --> 00:00:34,100
+and authorizes the payout
+
+17
+00:00:34,100 --> 00:00:36,010
+through NEAR Chain Signatures.
+
+18
+00:00:36,500 --> 00:00:39,580
+The browser broadcasts the signed Bitcoin transaction.
+
+19
+00:00:39,800 --> 00:00:41,000
+No wrapped token,
+
+20
+00:00:41,200 --> 00:00:43,330
+and no private key passed to the winner.
+
+21
+00:00:43,800 --> 00:00:45,840
+The public Bitcoin record confirms
+
+22
+00:00:45,880 --> 00:00:49,400
+19,750 test sats delivered,
+
+23
+00:00:49,440 --> 00:00:52,280
+with a 250-sat fee.
+
+24
+00:00:52,800 --> 00:00:54,560
+This is a testnet prototype
+
+25
+00:00:54,580 --> 00:00:56,800
+with an admin upgrade key.
+
+26
+00:00:56,960 --> 00:00:58,600
+Fund first, pass the claim,
+
+27
+00:00:58,700 --> 00:01:01,460
+and let the holder choose where Bitcoin goes.

@@ -1,5 +1,24 @@
 # Public evidence
 
+## Recorded Gift #3 — 14 November 2026
+
+Run `pnpm verify:gift3` for a fresh read-only check. [The public manifest](gift3-proof.json) identifies all expected records; [the dated verification snapshot](gift3-verification.json) records the observed result. Gift #3 paid **19,750 testnet4 sats**, with a **250-sat payout fee**, from its **20,000-sat** funding output. The separate funding fee was also 250 sats. The payout was confirmed in block **161287** at the saved check; query again for current status. Gift #1 was verified still transferable and funded with 100,000 sats.
+
+| Step | Public record |
+| --- | --- |
+| Create claim #3 | [NEAR mint](https://testnet.nearblocks.io/txns/Ba34Sf3JotwDxCw7JKkMB8FPKVWCYqJJY6yJZQYVMa4D) |
+| Source authorizes funding | [NEAR MPC request](https://testnet.nearblocks.io/txns/4ZVcEe6yE3H4EMQbYHRHktvvkxUxjH7xEbBsw9auUcF4) |
+| Fund 20,000 test sats | [Bitcoin funding](https://mempool.space/testnet4/tx/9bd1374bc9fff57643f75f717513db60ca0021b98fe23658f4305da6c6ebc6e4) |
+| Transfer claim to new holder | [NEAR transfer](https://testnet.nearblocks.io/txns/4aJDiiWDpYtuCVv2i562sZANwKgz7ffjBrWoLo7Kw3UB) |
+| Holder authorizes payout | [NEAR MPC request](https://testnet.nearblocks.io/txns/CxYuo541g6f34tGKvR2iScPps1T6L2gUCSxySMrpLQMA) |
+| Deliver native Bitcoin | [Bitcoin payout](https://mempool.space/testnet4/tx/665a155eba10da7f8219cbc5077da5d63070be3e9b2e7da4dbbaf2e27b8ad931) |
+
+The verifier links the final NEAR actions/events to a live-root-derived Bitcoin key, then checks the raw payout sighash, witness key and MPC signature. It separately verifies the funding signature and the preserved Gift #1 UTXO. These are historical transactions; running the verifier neither signs nor broadcasts. No live old-holder rejection transaction was sent for Gift #3; owner gating is covered by contract unit tests. Captured product footage documents the browser-guided CLI wallet workflow, while RPC verifies public execution.
+
+The [current Gift #3 app proof](gift3-current-proof.png) and [public Bitcoin confirmation](gift3-bitcoin-confirmed.png) were captured during final production on 14 November.
+
+## Earlier handoffs
+
 The public verifier is `pnpm verify:public`. For gift #0, it checks the current NEAR owner and redemption state, independently derives the gift Bitcoin address, recomputes the payout's SegWit sighash and matches it to the digest stored by the NEAR contract, compares the Bitcoin witness public key and signature components to the derived key and stored MPC signature, checks the 100,000 sat funding output was spent, and checks a confirmed 99,750 sat payout to the recipient address. For gift #1, it checks that the NEAR claim remains transferable and that the gift address has a 100,000 sat UTXO. For gift #2, it checks final mint, transfer and signing actions, current owner, 20,000 sat funding, 19,750 sat native Bitcoin payout, and the same SegWit digest, derived-key and MPC-witness relationships. An independent CLI build produced gift #2's browser-broadcast transaction ID. Gift #2 confirmed in testnet4 block 160600 on 11 November. The verifier reports current Bitcoin confirmation state, which can change on testnet4. RPC verifies chain state and transactions; screenshots document the browser-guided interaction.
 
 | Step | Public record |

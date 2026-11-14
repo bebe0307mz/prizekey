@@ -1,0 +1,109 @@
+{
+  "result": "PASS",
+  "checkedAt": "2026-11-14T12:04:10.213Z",
+  "network": "NEAR testnet + Bitcoin testnet4",
+  "scope": "Public read-only verification of recorded Gift #3 execution; does not sign or broadcast.",
+  "giftId": "3",
+  "currentOwner": "prizekey-recipient-11b.testnet",
+  "giftAddress": "tb1q6c8wlxy0d200d9885445j5e9x57puzkq20lwmd",
+  "rootKeySource": "Live public_key view of v1.signer-prod.testnet",
+  "fundedSats": 20000,
+  "paidSats": 19750,
+  "destination": "tb1q40tm8unf8g7lcg4cmg47fhmhhyssnuqfqaesr5",
+  "fundingFeeSats": 250,
+  "payoutFeeSats": 250,
+  "payoutTxid": "665a155eba10da7f8219cbc5077da5d63070be3e9b2e7da4dbbaf2e27b8ad931",
+  "payoutConfirmed": true,
+  "confirmedBlockHeight": 161287,
+  "confirmedBlockHash": "00000000d557b439822356668653ee87a8cc405a7e812b5cb635614f3d20f60e",
+  "confirmedBlockTime": 1794663295,
+  "giftUnspentSats": 0,
+  "checks": [
+    "Final NEAR mint and return value",
+    "Final NEAR transfer and NFT ownership events",
+    "Recipient authorization and gift-specific MPC receipt/callback",
+    "Live MPC root derivation of gift Bitcoin key/address",
+    "Exact Bitcoin funding input, payout destination, amount and fees",
+    "Raw Bitcoin payout sighash and witness match NEAR digest and MPC signature",
+    "Funding MPC request and signature match raw funding transaction",
+    "Gift #1 remains transferable and its 100,000-sat UTXO remains unspent"
+  ],
+  "preservedGift": {
+    "id": "1",
+    "owner": "prizekey-poc-11a7.testnet",
+    "transferable": true,
+    "unspentSats": 100000
+  },
+  "sources": {
+    "nearReads": [
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "query",
+        "params": {
+          "request_type": "call_function",
+          "finality": "final",
+          "account_id": "prizekey-v1-11b.testnet",
+          "method_name": "gift",
+          "args_base64": "eyJ0b2tlbl9pZCI6IjEifQ=="
+        },
+        "blockHeight": 277654432
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "tx",
+        "hash": "CxYuo541g6f34tGKvR2iScPps1T6L2gUCSxySMrpLQMA",
+        "signer": "prizekey-recipient-11b.testnet"
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "query",
+        "params": {
+          "request_type": "call_function",
+          "finality": "final",
+          "account_id": "v1.signer-prod.testnet",
+          "method_name": "public_key",
+          "args_base64": "e30="
+        },
+        "blockHeight": 277654432
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "query",
+        "params": {
+          "request_type": "call_function",
+          "finality": "final",
+          "account_id": "prizekey-v1-11b.testnet",
+          "method_name": "gift",
+          "args_base64": "eyJ0b2tlbl9pZCI6IjMifQ=="
+        },
+        "blockHeight": 277654432
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "tx",
+        "hash": "4aJDiiWDpYtuCVv2i562sZANwKgz7ffjBrWoLo7Kw3UB",
+        "signer": "prizekey-poc-11a7.testnet"
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "tx",
+        "hash": "Ba34Sf3JotwDxCw7JKkMB8FPKVWCYqJJY6yJZQYVMa4D",
+        "signer": "prizekey-poc-11a7.testnet"
+      },
+      {
+        "endpoint": "https://rpc.testnet.near.org",
+        "method": "tx",
+        "hash": "4ZVcEe6yE3H4EMQbYHRHktvvkxUxjH7xEbBsw9auUcF4",
+        "signer": "prizekey-poc-11a7.testnet"
+      }
+    ],
+    "bitcoinApi": "https://mempool.space/testnet4/api",
+    "funding": "https://mempool.space/testnet4/api/tx/9bd1374bc9fff57643f75f717513db60ca0021b98fe23658f4305da6c6ebc6e4",
+    "payout": "https://mempool.space/testnet4/api/tx/665a155eba10da7f8219cbc5077da5d63070be3e9b2e7da4dbbaf2e27b8ad931"
+  },
+  "limitations": [
+    "No live old-owner rejection transaction was sent for Gift #3. Owner gating has unit-test coverage.",
+    "Confirmation status is a dated public observation and may change after a testnet reorganization.",
+    "RPC verification proves chain records, while captured footage documents browser interaction."
+  ]
+}

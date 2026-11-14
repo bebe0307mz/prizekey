@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { contracts, chainAdapters } from 'chainsig.js';
 import bitcoinjs from 'bitcoinjs-lib';
+import { publicRpc } from './public-rpc.mjs';
 
 const contract = 'prizekey-v1-11b.testnet';
 const btcApi = 'https://mempool.space/testnet4/api';
@@ -19,32 +20,24 @@ const browserPayoutTxid = '58619632aa1e44ce6e28cb838d4015046894585b1ca3e0e2ff463
 const browserDestination = 'tb1q40tm8unf8g7lcg4cmg47fhmhhyssnuqfqaesr5';
 
 async function json(url, options) {
-  const response = await fetch(url, options);
+  const response = await fetch(url, { ...options, signal: AbortSignal.timeout(20_000) });
   assert.equal(response.ok, true, `${url}: HTTP ${response.status}`);
   return response.json();
 }
 
 async function view(method, args) {
-  const body = await json('https://rpc.testnet.near.org', {
-    method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 'prizekey-verifier', method: 'query', params: {
-      request_type: 'call_function', finality: 'final', account_id: contract,
-      method_name: method, args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-    } }),
+  const { result } = await publicRpc('query', {
+    request_type: 'call_function', finality: 'final', account_id: contract,
+    method_name: method, args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
   });
-  assert.equal(body.error, undefined, JSON.stringify(body.error));
-  return JSON.parse(Buffer.from(body.result.result).toString());
+  return JSON.parse(Buffer.from(result.result).toString());
 }
 
 async function nearTx(hash, signer) {
-  const body = await json('https://rpc.testnet.near.org', {
-    method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 'prizekey-verifier-tx', method: 'tx', params: [hash, signer] }),
-  });
-  assert.equal(body.error, undefined, JSON.stringify(body.error));
-  assert.equal(body.result.final_execution_status, 'FINAL', `${hash} not final`);
-  assert.ok(body.result.status?.SuccessValue != null, `${hash} failed`);
-  return body.result;
+  const { result } = await publicRpc('tx', [hash, signer]);
+  assert.equal(result.final_execution_status, 'FINAL', `${hash} not final`);
+  assert.ok(result.status?.SuccessValue != null, `${hash} failed`);
+  return result;
 }
 
 function assertNearAction(tx, method, args, deposit) {
@@ -132,7 +125,7 @@ const [funding, payout, payoutStatus] = await Promise.all([
   json(`${btcApi}/tx/${fundingTxid}`), json(`${btcApi}/tx/${payoutTxid}`),
   json(`${btcApi}/tx/${payoutTxid}/status`),
 ]);
-const rawResponse = await fetch(`${btcApi}/tx/${payoutTxid}/hex`);
+const rawResponse = await fetch(`${btcApi}/tx/${payoutTxid}/hex`, { signal: AbortSignal.timeout(20_000) });
 assert.equal(rawResponse.ok, true, 'payout raw transaction unavailable');
 const rawPayout = await rawResponse.text();
 const tx = bitcoinjs.Transaction.fromHex(rawPayout);
@@ -172,7 +165,7 @@ assert.ok(browserPayout.vin.some((i) => i.txid === browserFundingTxid &&
   i.vout === browserFundedOutput), 'browser payout did not spend gift output');
 assert.ok(browserPayout.vout.some((o) => o.scriptpubkey_address === browserDestination &&
   o.value === 19_750), 'browser payout destination or amount mismatch');
-const browserRawResponse = await fetch(`${btcApi}/tx/${browserPayoutTxid}/hex`);
+const browserRawResponse = await fetch(`${btcApi}/tx/${browserPayoutTxid}/hex`, { signal: AbortSignal.timeout(20_000) });
 assert.equal(browserRawResponse.ok, true, 'browser payout raw transaction unavailable');
 const browserRawTx = bitcoinjs.Transaction.fromHex(await browserRawResponse.text());
 assert.equal(browserRawTx.getId(), browserPayoutTxid);

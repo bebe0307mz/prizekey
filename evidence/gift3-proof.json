@@ -1,0 +1,33 @@
+{
+  "network": "NEAR testnet + Bitcoin testnet4",
+  "scope": "Recorded execution; public read-only verification. Valueless test assets.",
+  "contract": "prizekey-v1-11b.testnet",
+  "giftId": "3",
+  "title": "A Bitcoin prize for Michael",
+  "message": "Created, transferred and redeemed in the actual product demo.",
+  "creator": "prizekey-poc-11a7.testnet",
+  "recipient": "prizekey-recipient-11b.testnet",
+  "giftAddress": "tb1q6c8wlxy0d200d9885445j5e9x57puzkq20lwmd",
+  "destination": "tb1q40tm8unf8g7lcg4cmg47fhmhhyssnuqfqaesr5",
+  "fundedSats": 20000,
+  "paidSats": 19750,
+  "fundingFeeSats": 250,
+  "payoutFeeSats": 250,
+  "near": {
+    "mint": "Ba34Sf3JotwDxCw7JKkMB8FPKVWCYqJJY6yJZQYVMa4D",
+    "fundingSignature": "4ZVcEe6yE3H4EMQbYHRHktvvkxUxjH7xEbBsw9auUcF4",
+    "transfer": "4aJDiiWDpYtuCVv2i562sZANwKgz7ffjBrWoLo7Kw3UB",
+    "payoutSignature": "CxYuo541g6f34tGKvR2iScPps1T6L2gUCSxySMrpLQMA"
+  },
+  "bitcoin": {
+    "funding": "9bd1374bc9fff57643f75f717513db60ca0021b98fe23658f4305da6c6ebc6e4",
+    "fundingOutput": 0,
+    "payout": "665a155eba10da7f8219cbc5077da5d63070be3e9b2e7da4dbbaf2e27b8ad931"
+  },
+  "preservedGift": {
+    "id": "1",
+    "address": "tb1qtwwe5nlkzpnv3tj8rd5gn4wjrn6nejve3flhfm",
+    "funding": "b201de6a6bf2605fe06a05e920267a7327ab46c4bed6d65c1529e41c1ea2feef",
+    "fundedSats": 100000
+  }
+}

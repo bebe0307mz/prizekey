@@ -14,11 +14,19 @@ PrizeKey fits the hackathon's **NFTs That Do Something** track: ownership of the
 
 ## What works today
 
-The first gift was created, funded with 100,000 testnet4 sats, transferred to a second NEAR account, and redeemed by that new holder for 99,750 sats (250 sat fee). The Bitcoin payout is confirmed. The original holder's attempt to request a signature after transfer was rejected by the contract. Run `pnpm verify:public` for an independent read of the public NEAR state and Bitcoin transactions. The [proof links](evidence/README.md) show each step.
+**Gift #3 is the complete recorded product run:** create a NEAR claim, fund its Bitcoin address with 20,000 testnet4 sats, transfer the claim to a second account, authorize as that holder, and broadcast 19,750 native testnet4 sats to the chosen destination. The payout was confirmed in block **161287** when checked on 14 November 2026. Confirmation is a dated observation; testnet reorganizations can change it.
 
-A second gift, **A Bitcoin prize**, is currently funded with a 100,000 sat testnet4 UTXO and remains transferable. It gives the public app a live unredeemed claim to inspect. Testnet4 confirmation status can change after a reorganization; the verifier reports the current status.
+[Watch the finished demo](public/demo.mp4) · [Read the shot map and narration](DEMO.md) · [Inspect every transaction](evidence/README.md) · [Saved verification result](evidence/gift3-verification.json).
 
-The browser app reads live contract state and Bitcoin UTXOs. Its NEAR CLI wallet option created gift #2, transferred it to a second NEAR account, requested that holder's Chain Signatures authorization, and broadcast a native Bitcoin testnet4 payout of 19,750 sats from a 20,000 sat gift. The wallet option prompted for terminal signing and a transaction hash at each NEAR step; it is a **browser-guided CLI signing flow**, not an embedded in-browser signer. The browser itself prepared and broadcast the Bitcoin transaction. `pnpm verify:public` checks the final NEAR actions, Bitcoin input/output, SegWit sighash, derived gift key, and MPC witness signature. An independent CLI build produced the same Bitcoin transaction ID as the browser. [Screenshots and transaction links](evidence/README.md) document the flow. The new payout confirmed in testnet4 block 160600 on 11 November; the verifier reports its current confirmation status. The app does not provide Bitcoin testnet4 faucet funds or a Bitcoin wallet.
+```sh
+pnpm verify:gift3
+```
+
+This read-only verifier checks final NEAR mint/transfer/signing actions and events, derives the gift address from the live MPC root public key, checks the Bitcoin input, destination, amount and fees, and matches the raw transaction's SegWit digest and witness to the NEAR-stored digest and MPC signature. It also checks that Gift #1 remains transferable with its 100,000-sat UTXO unspent. No signing credentials are needed. The original Gift #0 and Gift #2 handoffs remain separately reproducible with `pnpm verify:public`.
+
+The UI reads live NEAR state and Bitcoin UTXOs. The recorded NEAR steps used the browser wallet's **NEAR CLI option**, which required terminal signing and pasting the resulting transaction hash. This is a browser-guided CLI signing flow. The browser prepared and broadcast the Bitcoin payout. The app supplies neither Bitcoin faucet funds nor a Bitcoin funding wallet.
+
+The earlier holder's rejection after transfer has unit-test coverage. Gift #3's recording and verifier prove the successful new-holder path; no new old-holder rejection transaction was sent for this run.
 
 ## Why NEAR
 
@@ -34,7 +42,7 @@ pnpm dev
 # open the localhost URL printed by Vite
 ```
 
-Vite prints the actual port if 5175 is occupied. `pnpm build` builds the frontend. `cargo test -p prizekey-gift --lib` runs the contract unit tests; `cargo build --target wasm32-unknown-unknown --release -p prizekey-gift` builds its WASM. `pnpm verify:public` queries public NEAR and Bitcoin testnet4 APIs. No local wallet secrets are needed for read-only verification.
+Vite prints the actual port if 5175 is occupied. `pnpm build` builds the frontend. `cargo test -p prizekey-gift --lib` runs the contract unit tests; `cargo build --target wasm32-unknown-unknown --release -p prizekey-gift` builds its WASM. `pnpm verify:gift3` checks the recorded demo; `pnpm verify:public` checks historical handoffs. Both query public NEAR and Bitcoin testnet4 APIs with bounded timeouts and NEAR RPC fallback. No local wallet secrets are needed for read-only verification.
 
 To create a fresh gift, connect a NEAR **testnet** wallet with at least 0.01 testnet NEAR, create the gift, fund the displayed Bitcoin **testnet4** address, then transfer the claim. The new holder can redeem one UTXO to a `tb1…` testnet4 address. The gift locks against transfer as soon as a signing request starts, including if the signing callback later fails. The CLI alternative is `DESTINATION_BTC=tb1... TOKEN_ID=1 pnpm claim prepare`, owner calling `request_btc_signature` with the displayed digest, then `pnpm claim broadcast`. CLI records are written under `evidence/*-local.json` and ignored by Git.
 
@@ -42,13 +50,23 @@ To create a fresh gift, connect a NEAR **testnet** wallet with at least 0.01 tes
 
 - [`contracts/gift/src/lib.rs`](contracts/gift/src/lib.rs): owner-gated gift creation, direct transfer, MPC signing request, asynchronous callback, and gift views.
 - [`src/App.jsx`](src/App.jsx): live testnet UI and browser-side Bitcoin transaction preparation, signing request, and broadcast.
-- [`scripts/verify-public.mjs`](scripts/verify-public.mjs): repeatable public-chain checks for two completed Bitcoin handoffs, the still-funded prize, and the browser-guided NEAR transactions. Public RPC verifies transaction content and state; screenshots document the browser actions.
+- [`scripts/verify-public.mjs`](scripts/verify-public.mjs): repeatable checks for the two earlier handoffs and the still-funded prize. [`scripts/verify-gift3.mjs`](scripts/verify-gift3.mjs) verifies the recorded final demo from live public records. Public RPC verifies transaction content and state; screenshots document the browser actions.
 
 This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` and approvals are absent. The contract does not parse or enforce the Bitcoin payout destination or fee: the holder authorizes a 32-byte digest, and the current browser prepares a one-input, one-output sweep with a fixed 250 sat fee. Anyone using the app should review the displayed destination and use only valueless test assets. A deployed full-access account key currently permits an account controller to replace the contract or bypass its policy; **do not treat this deployment as a trustless production vault**. We intend to remove that key only after the contract and demonstration are finalized. There is no automatic Bitcoin confirmation watcher or refund after redemption starts. Further funding after redemption can strand Bitcoin if the owner does not sign again. No mainnet or real-value flow has been tested.
 
 ## Hackathon demo
 
-Watch the [33-second actual-app walkthrough](public/demo.mp4), or follow [DEMO.md](DEMO.md). PrizeKey is separate from [Orbit](https://github.com/bebe0307mz/orbit) and has its own contract, app, repository, and submission story.
+Watch the [finished narrated product demo](public/demo.mp4), or follow [DEMO.md](DEMO.md). It reuses the actual Gift #3 execution, trims genuine network/wallet waits, and ends on independently checked Bitcoin confirmation. It performs no new transaction during playback.
+
+The published [GitHub Pages demo](https://bebe0307mz.github.io/prizekey/) reflects the last published revision; local final production changes require a separately authorized push and Pages build. Use the local setup above to inspect this revision.
+
+## Contributors, dependencies and provenance
+
+The repository is hosted under [`bebe0307mz`](https://github.com/bebe0307mz); authentic author and commit timestamps remain in Git history. Zoe is the PrizeKey contributor and narrator, and also contributes to Orbit. Narration uses her authorized QUICK voice model. Final submission contact and team fields require human confirmation.
+
+Development is AI-assisted. Material dependencies are React, Vite, GSAP, Lucide, HOT Labs Near Connect, near-api-js, chainsig.js, bitcoinjs-lib, and Rust near-sdk; versions are pinned in the package/Cargo lockfiles. The NEAR MPC signer is external infrastructure. Video composition and caption timing use local FFmpeg, Pillow and Whisper; narration uses Zoe's existing authorized Fish Audio model. Raw voice samples, model IDs and signing credentials are excluded from the repository.
+
+PrizeKey is independent of the other projects disclosed here: [Orbit](https://github.com/bebe0307mz/orbit) provides agent spending limits; AfterVote reconciles DAO payments; Capture Test examines Chain Signatures activity. PrizeKey has its own contract, app, evidence and repository and depends on none of those projects. This disclosure does not establish anyone's eligibility under the event's two-project-per-person limit; actual contribution and team membership must be checked.
 
 License: MIT.
 
