@@ -14,7 +14,7 @@ PrizeKey fits the hackathon's **NFTs That Do Something** track: ownership of the
 
 ## Gift manager and recipient page
 
-The app opens on gifts and their balances, with controls to create a gift, transfer a claim, open its recipient page, and inspect transaction status. Supporting historical evidence is inside **Transaction details**; the organizer workspace is independent of the video.
+The landing briefly explains the giveaway problem and how a transferable claim solves it, then shows gifts and their balances, with controls to create a gift, transfer a claim, open its recipient page, and inspect transaction status. Supporting historical evidence is inside **Transaction details**; the organizer workspace is independent of the video.
 
 A `?claim=3` link opens only that gift’s recipient page. It reads the exact gift directly, including gifts older than the recent list. The link grants no ownership. The sender must transfer to the recipient’s NEAR account, and only that account may approve a payout. Localhost links are labeled **local previews** and are not public redeem links.
 
@@ -66,7 +66,7 @@ This is a **direct-transfer NFT subset**, not full NEP-171: `nft_transfer_call` 
 
 ## Hackathon demo
 
-Watch the [60-second portrait walkthrough](public/demo.mp4) or the [1080p landscape copy](public/demo-1080p.mp4). One actual Gift #3 carries the story: funded Bitcoin, a claim transferred to the winner, their chosen Bitcoin destination, and confirmed delivery. Original signing footage is labeled as recorded; the current recipient page and transaction details close the journey. [DEMO.md](DEMO.md) documents the exact evidence and capture limit; [DEMO-SCRIPT.md](DEMO-SCRIPT.md) contains the matching narration. No new transaction was performed for this edit.
+Watch the [70-second portrait walkthrough](public/demo.mp4) or the [1080p landscape copy](public/demo-1080p.mp4). The opening explains the organizer’s problem and PrizeKey’s solution on the actual landing, then opens the Create gift form without submitting. One actual Gift #3 carries the example: funded Bitcoin, a claim transferred to the winner, their chosen Bitcoin destination, and confirmed delivery. Original signing footage is labeled as recorded; the current recipient page and transaction details close the journey. [DEMO.md](DEMO.md) documents the exact evidence and capture limit; [DEMO-SCRIPT.md](DEMO-SCRIPT.md) contains the matching narration. No new transaction was performed for this edit.
 
 The [public app](https://bebe0307mz.github.io/prizekey/), [recipient record](https://bebe0307mz.github.io/prizekey/?claim=3), and [demo video](https://bebe0307mz.github.io/prizekey/demo.mp4) are hosted through the repository’s GitHub Pages workflow. Use the local setup above to reproduce this revision.
 

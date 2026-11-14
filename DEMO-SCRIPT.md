@@ -1,10 +1,12 @@
-# PrizeKey — one-gift walkthrough
+# PrizeKey — problem, solution, gift walkthrough
 
-60 seconds. Zoe QUICK, using her existing authorized voice model. The current recipient page introduces and closes the story; original desktop execution remains labeled **Recorded test · earlier UI**. All scenes concern the same actual Gift #3.
+70 seconds. Zoe QUICK uses her existing authorized voice model. The opening is the real current landing page, with separate phone and desktop captures. It introduces the problem, explains the solution and opens the Create gift form without submitting it. The remaining walkthrough preserves actual Gift #3 evidence, with original desktop execution labeled **Recorded test · earlier UI**.
 
 ## Narration
 
-Let's say I'm running a giveaway. I can put the Bitcoin aside before I know who'll win.
+I want to fund a Bitcoin prize today, but I don't know who'll win, or which wallet they'll use.
+
+With PrizeKey, I fund a gift first, pass its NEAR claim to the winner, and let them choose where Bitcoin goes. Let me show you.
 
 In this earlier test, I funded a gift with twenty thousand test sats. It has its own Bitcoin address.
 
@@ -22,13 +24,14 @@ If they want to check, the transaction is right here. Fund the prize first. Let 
 
 | Time | Screen and story |
 | --- | --- |
-| 0–7s | Current Gift #3 recipient page introduces the completed gift and the giveaway problem. Real scrolling reveals the recipient. |
-| 7–15s | Earlier test run: read the same gift’s 20,000-sat funding and its Bitcoin address. |
-| 15–23s | Enter the winner’s NEAR account, approve the recorded transfer, then show the actual new holder. |
-| 23–30.8s | The holder enters a Bitcoin destination and approves the recorded payout. |
-| 30.8–39s | NEAR Chain Signatures authorization and genuine browser broadcast. Terminal-wallet approval is disclosed. |
-| 39–49s | The current recipient page shows 19,750 test sats confirmed in block161287, the assigned recipient and the completed-record notice. Tap its public record. |
-| 49–56.8s | Current loaded transaction record: confirmed-status tap and two genuine short scrolls. |
-| 56.8–60s | Editorial return to the same delivered gift for the closing reading hold. |
+| 0–7.6s | Actual landing: the organizer wants to set aside Bitcoin before knowing the winner or their Bitcoin address. |
+| 7.6–17s | Same landing: explain funding a gift first, transferring its NEAR claim, and letting the winner choose the Bitcoin destination. Tap Create gift to open the real form; do not submit it. |
+| 17–25s | Earlier test run: the same Gift #3 funded with 20,000 test sats and its Bitcoin address. |
+| 25–33s | Enter the winner’s NEAR account, recorded transfer approval, and actual changed holder. |
+| 33–40.8s | The holder chooses a Bitcoin address and approves the recorded payout. |
+| 40.8–49s | NEAR Chain Signatures authorization and genuine browser broadcast. Terminal-wallet approval is disclosed. |
+| 49–59s | Current recipient page: 19,750 test sats confirmed in block 161287, assigned recipient, completed-record notice and public-record tap. |
+| 59–66.8s | Current transaction record: confirmed-status tap and two real short scrolls. |
+| 66.8–70s | Closing reading hold on the same delivered gift. |
 
-Portrait uses fixed vertical regions of the original desktop recording so the controls remain readable. They are recorded desktop views, not fresh phone signing. The landscape copy retains broader desktop context. No tiny wide card floats in a tall frame. No new signing, transfer or broadcast was performed for this edit.
+The opening follows the user’s requested problem → solution → actual walkthrough structure. The app keeps the introduction concise and retains the primary gift controls. There are no explanatory slides. Portrait uses fixed vertical regions of genuine desktop transaction footage; those are not newly performed phone transactions. No new creation, signing, transfer or broadcast was performed for this edit.

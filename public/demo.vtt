@@ -1,70 +1,85 @@
 WEBVTT
 
-00:00:00.350 --> 00:00:02.030
-Let’s say I’m running a giveaway.
+00:00:00.350 --> 00:00:03.000
+I want to fund a Bitcoin prize today,
 
-00:00:02.350 --> 00:00:04.070
-I can put the Bitcoin aside
+00:00:03.570 --> 00:00:05.010
+but I don’t know who’ll win,
 
-00:00:04.070 --> 00:00:06.070
-before I know who’ll win.
+00:00:05.010 --> 00:00:07.050
+or which wallet they’ll use.
 
-00:00:07.250 --> 00:00:08.450
+00:00:07.650 --> 00:00:08.630
+With PrizeKey,
+
+00:00:08.730 --> 00:00:10.010
+I fund a gift first,
+
+00:00:10.150 --> 00:00:11.950
+pass its NEAR claim to the winner,
+
+00:00:11.950 --> 00:00:14.450
+and let them choose where Bitcoin goes.
+
+00:00:14.650 --> 00:00:15.500
+Let me show you.
+
+00:00:17.250 --> 00:00:18.450
 In this earlier test,
 
-00:00:08.730 --> 00:00:11.530
+00:00:18.730 --> 00:00:21.530
 I funded a gift with 20,000 test sats.
 
-00:00:11.970 --> 00:00:13.750
+00:00:21.970 --> 00:00:23.750
 It has its own Bitcoin address.
 
-00:00:15.300 --> 00:00:16.350
+00:00:25.300 --> 00:00:26.350
 Once I have a winner,
 
-00:00:16.460 --> 00:00:17.680
+00:00:26.460 --> 00:00:27.680
 I enter their NEAR account
 
-00:00:17.680 --> 00:00:19.120
+00:00:27.680 --> 00:00:29.120
 and pass them the claim.
 
-00:00:19.300 --> 00:00:21.150
+00:00:29.300 --> 00:00:31.150
 I don’t need their Bitcoin address.
 
-00:00:23.250 --> 00:00:24.750
+00:00:33.250 --> 00:00:34.750
 Now they’re the holder.
 
-00:00:24.850 --> 00:00:26.970
+00:00:34.850 --> 00:00:36.970
 They choose where to receive the Bitcoin,
 
-00:00:26.970 --> 00:00:28.750
+00:00:36.970 --> 00:00:38.750
 and approve the payout.
 
-00:00:31.000 --> 00:00:33.400
+00:00:41.000 --> 00:00:43.400
 NEAR Chain Signatures authorizes it,
 
-00:00:33.660 --> 00:00:35.450
+00:00:43.660 --> 00:00:45.450
 then the browser sends Bitcoin.
 
-00:00:35.900 --> 00:00:38.550
+00:00:45.900 --> 00:00:48.550
 This earlier test used a terminal wallet.
 
-00:00:39.250 --> 00:00:41.050
+00:00:49.250 --> 00:00:51.050
 Here’s what the recipient sees today.
 
-00:00:41.290 --> 00:00:44.550
+00:00:51.290 --> 00:00:54.550
 19,750 test sats delivered,
 
-00:00:44.550 --> 00:00:47.150
+00:00:54.550 --> 00:00:57.150
 after a 250-sat fee.
 
-00:00:49.300 --> 00:00:50.350
+00:00:59.300 --> 00:01:00.350
 If they want to check,
 
-00:00:50.560 --> 00:00:52.500
+00:01:00.560 --> 00:01:02.500
 the transaction is right here.
 
-00:00:52.800 --> 00:00:53.900
+00:01:02.800 --> 00:01:03.900
 Fund the prize first.
 
-00:00:54.200 --> 00:00:56.150
+00:01:04.200 --> 00:01:06.150
 Let the winner choose where it goes.
